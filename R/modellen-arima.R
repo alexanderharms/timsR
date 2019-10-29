@@ -109,7 +109,6 @@ pred_arima2 <- function(model, h, regressoren=NULL) {
   return(return_df)
 }
 
-# Modellen voor GEBOORTE
 # Arima model 3: seasonal model handmatig gespecificeerd
 train_arima3 <- function(doelreeks, regressoren=NULL){
   x <- na.trim.ts(doelreeks)
@@ -190,7 +189,6 @@ pred_arima5 <- function(model, h, regressoren=NULL) {
   return(return_df)
 }
 
-# Modellen voor STERFTE
 # Model 6: non-seasonal, handmatig gespecificeerd 
 train_arima6 <- function(doelreeks, regressoren=NULL){
   x <- na.trim.ts(doelreeks)
@@ -265,7 +263,6 @@ pred_arima7 <- function(model, h, regressoren=NULL) {
   return(return_df)
 }
 
-# Modellen voor IMMIGRATIE
 # Seasonal model zonder drift, handmatig gespecificeerd 
 train_arima8 <- function(doelreeks, regressoren=NULL){
   x <- na.trim.ts(doelreeks)
@@ -461,7 +458,6 @@ pred_arima12 <- function(model, h, regressoren=NULL) {
   return(return_df)
 }
 
-# Modellen voor EMIGRATIE
 # Model 13: Seasonal model met drift, handmatig gespecificeerd
 train_arima13 <- function(doelreeks, regressoren=NULL){
   x <- na.trim.ts(doelreeks)
@@ -658,7 +654,6 @@ pred_arima17 <- function(model, h, regressoren=NULL) {
   return(return_df)
 }
 
-# Modellen voor MIGRATIESALDO
 train_arima18 <- function(doelreeks, regressoren=NULL){
   x <- na.trim.ts(doelreeks)
   if (is.null(regressoren)){
