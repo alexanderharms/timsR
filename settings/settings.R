@@ -1,17 +1,13 @@
 ### Alle locaties van bestanden zijn relatief ten opzichte van de locatie 
 ### van het R-project.
 # Het databestand bevat de doelreeks(en) en de regressoren.
-# Het ramingbestand bevat ramingen die tijdens de testperiode gebruikt kunnen
-# worden.
-# Het databestand en ramingbestand worden in op hetzelfde pad gezocht.
 DATAPAD <- "./data/"
 DATABESTAND <- "data.csv"
 
 # Tijdens de berekeningen worden een aantal gegevens gelogd.
 # De berekende metrieken worden tussendoor weggeschreven als csv-bestanden.
 # Als LOGBESTAND <- "./logs/log.txt" dan worden ze weggeschreven op 
-# "./logs/log_vooruit.csv", en eventueel "./logs/log_achteruit.csv", 
-# "./logs/log_gemiddeld.csv". 
+# "./logs/log_vooruit.csv".
 LOGBESTAND <- "./logs/log.txt"
 
 # Frequentie van de tijdreeks. Voor maandelijkse data, FREQ <- 12.
