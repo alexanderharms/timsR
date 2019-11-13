@@ -14,3 +14,7 @@ Als de data van de hulpvariabele wel beschikbaar is de voorspel-
 periode van de tijdreeks, laat dan de rijen voor de voorspel-datums leeg in de 
 kolom van de doelreeks.
 
+Voor meer informatie over tijdreeksanalyse is het boek "Time-Series Forecasting" van 
+Chatfield te raadplegen. Informatie over structurele tijdreeksmodellen is terug
+te vinden in het boek "An Introduction to State Space Time Series Analysis" van
+Commandeur en Koopman.
