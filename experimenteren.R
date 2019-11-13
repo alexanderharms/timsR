@@ -12,7 +12,7 @@ library(timeDate)
 library(forecast)  
 library(magrittr)
 library(tseries)   
-library(KFAS)
+#library(KFAS) # Alleen relevant bij structurele tijdreeksmodellen
 
 source("./R/hulpfuncties.R")
 source("./R/rol_hor_functies.R")

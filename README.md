@@ -18,3 +18,6 @@ Voor meer informatie over tijdreeksanalyse is het boek "Time-Series Forecasting"
 Chatfield te raadplegen. Informatie over structurele tijdreeksmodellen is terug
 te vinden in het boek "An Introduction to State Space Time Series Analysis" van
 Commandeur en Koopman.
+
+De proefdataset 'seatbelts.csv' in de map ./data/ is afkomstig uit het package 
+'datasets'.
