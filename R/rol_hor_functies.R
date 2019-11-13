@@ -6,9 +6,9 @@ rol_hor_model_loop <- function(doelreeks, MODEL_VECTOR, STARTTEST,
   metrieken_maand <- data.frame("Modelnaam" = c(), 
                                 "ME" = c(), "RMSE" = c(), "MAE" = c(), 
                                 "MPE" = c(), "MAPE" = c())
-  metrieken_jaar <- data.frame("Modelnaam" = c(), 
-                               "ME" = c(), "RMSE" = c(), "MAE" = c(), 
-                               "MPE" = c(), "MAPE" = c())
+#  metrieken_jaar <- data.frame("Modelnaam" = c(), 
+#                               "ME" = c(), "RMSE" = c(), "MAE" = c(), 
+#                               "MPE" = c(), "MAPE" = c())
   error_modellen <- c()
   
   # Loop over de modellen in de MODEL_VECTOR
@@ -58,18 +58,18 @@ rol_hor_model_loop <- function(doelreeks, MODEL_VECTOR, STARTTEST,
                MPE = MPE %>% as.character() %>% as.numeric(),
                MAPE = MAPE %>% as.character() %>% as.numeric())
       
-      metrieken_jaar <- rbind(metrieken_jaar, 
-                              cbind(model_naam, 
-                                    rol_hor_list$metrieken_jaar),
-                              make.row.names = FALSE) %>%
-        mutate(ME = ME %>% as.character() %>% as.numeric(),
-               RMSE = RMSE %>% as.character() %>% as.numeric(),
-               MAE = MAE %>% as.character() %>% as.numeric(),
-               MPE = MPE %>% as.character() %>% as.numeric(),
-               MAPE = MAPE %>% as.character() %>% as.numeric())
+#      metrieken_jaar <- rbind(metrieken_jaar, 
+#                              cbind(model_naam, 
+#                                    rol_hor_list$metrieken_jaar),
+#                              make.row.names = FALSE) %>%
+#        mutate(ME = ME %>% as.character() %>% as.numeric(),
+#               RMSE = RMSE %>% as.character() %>% as.numeric(),
+#               MAE = MAE %>% as.character() %>% as.numeric(),
+#               MPE = MPE %>% as.character() %>% as.numeric(),
+#               MAPE = MAPE %>% as.character() %>% as.numeric())
       
       metrieken_list <- list("metrieken_maand" = metrieken_maand,
-                             "metrieken_jaar" = metrieken_jaar,
+                            # "metrieken_jaar" = metrieken_jaar,
                              "error_modellen" = error_modellen)
     },
     # Als de rolling horizon een error oplevert, voeg dan de
@@ -78,21 +78,21 @@ rol_hor_model_loop <- function(doelreeks, MODEL_VECTOR, STARTTEST,
       error_modellen <- c(error_modellen, model_naam)
       print(cond) # Print de error
       return(list("metrieken_maand" = metrieken_maand,
-                  "metrieken_jaar" = metrieken_jaar,
+                 # "metrieken_jaar" = metrieken_jaar,
                   "error_modellen" = error_modellen))
     })
     
     if (!is.null(metrieken_list)) {
       metrieken_maand <- metrieken_list$metrieken_maand
-      metrieken_jaar  <- metrieken_list$metrieken_jaar
+#      metrieken_jaar  <- metrieken_list$metrieken_jaar
       error_modellen  <- metrieken_list$error_modellen
     }
     
   }
   
-  return(list("metrieken_jaar"  = metrieken_jaar,
-              "metrieken_maand" = metrieken_maand,
-              "error_modellen"  = error_modellen))
+  return(list("metrieken_maand" = metrieken_maand,
+#              "metrieken_jaar"  = metrieken_jaar,
+	      "error_modellen"  = error_modellen))
 }
 
 #' Rolling horizon, geen regressoren
@@ -119,8 +119,8 @@ rol_hor_geenreg <- function(reeks, FUN, FUN_PRED, start_eval,
   nowcasts_month <- data.frame("actual" = c(), 
                                "voorspelling" = c())
   
-  nowcasts_year <- data.frame("actual_year" = c(),
-                              "voorspelling_year" = c())
+#  nowcasts_year <- data.frame("actual_year" = c(),
+#                              "voorspelling_year" = c())
   
   plot_data <- list()
   getrainde_modellen <- list()
@@ -150,13 +150,13 @@ rol_hor_geenreg <- function(reeks, FUN, FUN_PRED, start_eval,
     
     # De laatste 12 maanden van de voorspelling worden opgeteld tot een 
     # jaarcijfer.
-    actual_year <- sum(tail(actual, 12))
-    voorspelling_year <- sum(tail(voorspelling, 12))
-    year_actual_pred <- cbind(actual_year, voorspelling_year)
+#    actual_year <- sum(tail(actual, 12))
+#    voorspelling_year <- sum(tail(voorspelling, 12))
+#    year_actual_pred <- cbind(actual_year, voorspelling_year)
     # print(year_actual_pred)
     
     nowcasts_month <- rbind(nowcasts_month, month_actual_pred)
-    nowcasts_year <- rbind(nowcasts_year, year_actual_pred)
+#    nowcasts_year <- rbind(nowcasts_year, year_actual_pred)
     
     # Geef plot_data tijdsinformatie mee om later als tijdreeks te plotten
     datum_vector <- enddate +
@@ -167,11 +167,11 @@ rol_hor_geenreg <- function(reeks, FUN, FUN_PRED, start_eval,
   # Bereken de metrieken op basis van de echte waarde en de voorspelling.
   metrieken_maand <- accuracy(nowcasts_month[, 'actual'], 
                               nowcasts_month[, 'voorspelling'])
-  metrieken_jaar <- accuracy(nowcasts_year[, 'actual_year'], 
-                             nowcasts_year[,'voorspelling_year'])
+#  metrieken_jaar <- accuracy(nowcasts_year[, 'actual_year'], 
+#                             nowcasts_year[,'voorspelling_year'])
   
   return(list("metrieken_maand" = metrieken_maand,
-              "metrieken_jaar"= metrieken_jaar,
+#              "metrieken_jaar"= metrieken_jaar,
               "plot_data" = plot_data,
               "modellen" = getrainde_modellen))
 }
@@ -202,8 +202,8 @@ rol_hor_reg <- function(reeks, FUN, FUN_PRED, start_eval,
   nowcasts_month <- data.frame("actual" = c(), 
                                "voorspelling" = c())
   
-  nowcasts_year <- data.frame("actual_year" = c(),
-                              "voorspelling_year" = c())
+#  nowcasts_year <- data.frame("actual_year" = c(),
+#                              "voorspelling_year" = c())
   
   plot_data <- list()
   getrainde_modellen <- list()
@@ -238,13 +238,13 @@ rol_hor_reg <- function(reeks, FUN, FUN_PRED, start_eval,
     
     # De laatste 12 maanden van de voorspelling worden opgeteld tot een 
     # jaarcijfer.
-    actual_year <- sum(tail(actual, 12))
-    voorspelling_year <- sum(tail(voorspelling, 12))
-    year_actual_pred <- cbind(actual_year, voorspelling_year)
+#    actual_year <- sum(tail(actual, 12))
+#    voorspelling_year <- sum(tail(voorspelling, 12))
+#    year_actual_pred <- cbind(actual_year, voorspelling_year)
     # print(year_actual_pred)
     
     nowcasts_month <- rbind(nowcasts_month, month_actual_pred)
-    nowcasts_year <- rbind(nowcasts_year, year_actual_pred)
+#    nowcasts_year <- rbind(nowcasts_year, year_actual_pred)
     
     # Geef plot_data tijdsinformatie mee om later als tijdreeks te plotten
     datum_vector <- enddate +
@@ -255,11 +255,11 @@ rol_hor_reg <- function(reeks, FUN, FUN_PRED, start_eval,
   # Bereken de metrieken op basis van de echte waarde en de voorspelling.
   metrieken_maand <- accuracy(nowcasts_month[, 'actual'], 
                               nowcasts_month[, 'voorspelling'])
-  metrieken_jaar <- accuracy(nowcasts_year[, 'actual_year'], 
-                             nowcasts_year[,'voorspelling_year'])
+#  metrieken_jaar <- accuracy(nowcasts_year[, 'actual_year'], 
+#                             nowcasts_year[,'voorspelling_year'])
   
   return(list("metrieken_maand" = metrieken_maand,
-              "metrieken_jaar"= metrieken_jaar,
+             # "metrieken_jaar"= metrieken_jaar,
               "plot_data" = plot_data,
               "modellen" = getrainde_modellen))
 }

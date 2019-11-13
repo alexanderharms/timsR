@@ -67,23 +67,23 @@ model_loop <- rol_hor_model_loop(doelreeks, MODEL_VECTOR, STARTTEST, N_TEST,
 
 # Sorteren en rapporteren -----------------------------------------------------
 metrieken_maand <- model_loop$metrieken_maand
-metrieken_jaar  <- model_loop$metrieken_jaar
+#metrieken_jaar  <- model_loop$metrieken_jaar
 # Sorteer de data frames met metrieken op de RMSE waarde
 metrieken_maand_sort <- metrieken_maand %>% dplyr::arrange(RMSE)
-metrieken_jaar_sort  <- metrieken_jaar %>% dplyr::arrange(RMSE)
+#metrieken_jaar_sort  <- metrieken_jaar %>% dplyr::arrange(RMSE)
 
 # Schrijf de data frames met metrieken weg naar het log bestand
 sink(LOGBESTAND, append = TRUE)
 print("Tijdreeks, vooruit:")
 print("Maand:")
 print(metrieken_maand_sort)
-print("Jaar:")
-print(metrieken_jaar_sort)
+#print("Jaar:")
+#print(metrieken_jaar_sort)
 print("Error modellen:")
 print(model_loop$error_modellen)
 sink()
 
 vooruit_csv <- substr(LOGBESTAND, start = 1, stop = nchar(LOGBESTAND) - 4) %>%
   paste0("_vooruit.csv")
-write.csv2(metrieken_jaar_sort, file = vooruit_csv)
+write.csv2(metrieken_maand_sort, file = vooruit_csv)
 
