@@ -21,3 +21,8 @@ Commandeur en Koopman.
 
 De proefdataset 'seatbelts.csv' in de map ./data/ is afkomstig uit het package 
 'datasets'.
+
+Deze scripts zijn orgineel geschreven voor een project dat Pauline en ik samen 
+uitgevoerd hebben. In de map 'origineel' staan de scripts die gebruikt zijn voor
+dit project. In de root-folder van dit project staat een versimpelde versie van 
+het script om direct aan de slag te kunnen met tijdreeksanalyse. 
