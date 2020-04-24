@@ -1,28 +1,39 @@
-# Experimenteeropzet voor het uitvoeren van tijdreeksanalyse
-Auteurs: Alexander Harms, Pauline Sluijpers
+# timsR
+> A testing setup for time series analysis.
 
-In deze map staan twee scripts: experimenteren.R en voorspellen.R. Met 
-experimenteren.R kan men met tijdreeksmodellen testen met de rolling horizon-
-methode. Het script voorspellen.R kan vervolgens gebruikt worden om met deze 
-modellen toekomstige waardes te voorspellen. De instellingen voor de 
-experimenten of de voorspellingen kunnen aangegeven worden in een apart bestand.
-Een voorbeeld hiervan is gegeven in settings/settings.R. 
+This set of scripts allows you to iterate quickly over a number of models you
+define. The variables of each test are defined in a settings file which can
+easily be exchanged with other people and which allow convenient re-testing.
+Results of each test are stored in a log file and are written to CSV.
 
-Voor het maken van een voorspelling behoort de te voorspellen tijdreeks in het 
-databestand te lopen tot het beginpunt van de voorspelling.
-Als de data van de hulpvariabele wel beschikbaar is de voorspel-
-periode van de tijdreeks, laat dan de rijen voor de voorspel-datums leeg in de 
-kolom van de doelreeks.
+## Installation
 
-Voor meer informatie over tijdreeksanalyse is het boek "Time-Series Forecasting" van 
-Chatfield te raadplegen. Informatie over structurele tijdreeksmodellen is terug
-te vinden in het boek "An Introduction to State Space Time Series Analysis" van
-Commandeur en Koopman.
+These scripts are written in R and depend on the packages:
+* dplyr
+* magrittr.
 
-De proefdataset 'seatbelts.csv' in de map ./data/ is afkomstig uit het package 
-'datasets'.
+## Usage example
 
-Deze scripts zijn orgineel geschreven voor een project dat Pauline en ik samen 
-uitgevoerd hebben. In de map 'origineel' staan de scripts die gebruikt zijn voor
-dit project. In de root-folder van dit project staat een versimpelde versie van 
-het script om direct aan de slag te kunnen met tijdreeksanalyse. 
+There are two scripts: 
+* experimenting.R: Used for testing various defined models.
+* predict.R: When the best model is found, the settings file can be used in to
+  use this model for predictions.
+
+In this repository an example is shown based on the dataset 'seatbelts.csv' from
+the package 'datasets'. The settings file is available in the folder 'settings'
+and the resulting log can be found in the 'logs' folder.
+
+
+## Development and contributing
+
+For development no specific conditions have to be met. One can contribute by
+forking the repository and opening a pull request.
+
+## Release History
+
+* 0.1.0
+    * The first proper release
+
+## Licence
+
+Distributed under the GPL 3 license. See ``LICENSE`` for more information.
