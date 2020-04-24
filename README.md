@@ -37,3 +37,6 @@ forking the repository and opening a pull request.
 ## Licence
 
 Distributed under the GPL 3 license. See ``LICENSE`` for more information.
+
+## Meta
+Authors: Alexander Harms and Pauline Sluijpers.

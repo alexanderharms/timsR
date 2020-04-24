@@ -1,42 +1,40 @@
-### Alle locaties van bestanden zijn relatief ten opzichte van de locatie 
-### van het R-project.
-# Het databestand bevat de doelreeks(en) en de regressoren.
-DATAPAD <- "./data/"
-DATABESTAND <- "seatbelts.csv"
+# The data file contains the target series and the regressors.
+DATAFILE <- "./data/seatbelts.csv"
 
-# Tijdens de berekeningen worden een aantal gegevens gelogd.
-# De berekende metrieken worden tussendoor weggeschreven als csv-bestanden.
-# Als LOGBESTAND <- "./logs/log.txt" dan worden ze weggeschreven op 
-# "./logs/log_vooruit.csv".
-LOGBESTAND <- "./logs/log.txt"
+# During the experiments a number of things are logd.
+# The calculated metrics are written to CSV files.
+# If LOGFILE is "./logs/log.txt", then the CSV files will get written to 
+# "./logs/log.csv".
+LOGFILE <- "./logs/log.txt"
 
-# Frequentie van de tijdreeks. Voor maandelijkse data, FREQ <- 12.
+# Frequency of the timeseries. For monthly data, FREQ <- 12.
 FREQ <- 12
 
-# Kolomnaam in DATABESTAND voor de te voorspellen tijdreeks.
-DOELREEKS_VAR <- "drivers" 
-# Kolomnamen in DATABESTAND die de regressoren aangeven.
-# Voer NULL in om regressoren uit te schakelen.
-REGKOLOMMEN <- c("kms")
+# Column in DATAFILE for the target time series.
+TARGET_VAR <- "drivers" 
+# Column(s) in DATAFILE that indicate the regressors.
+# Enter NULL to not use regressors.
+REGCOLUMNS <- c("kms")
 
-# Startdatum van reeksen in het invoerbestand
-# Geef hier in wat de eerste periode is die in het bestand staat.
+# Starting date of the time series.
 STARTDATA <- c(1969, 1)
 
-# Vanaf welke periode wil je het model laten doorrekenen?
-# Moet altijd gelijk of later dan STARTDATA zijn
-STARTMODEL <- c(1984, 12) 
+# The starting date of the training set.
+STARTMODEL <- c(1969, 1) 
 
-# STARTTEST is het eindpunt van de eerste rolling horizon test.
+# STARTTEST is the end point of the first rolling horizon test.
 STARTTEST <- c(1982, 1)
 
-H <- 12 # Voorspelhorizon
-N_TEST <- 24 # Aantal rolling horizons
+H <- 12 # Prediction horizon
+N_TEST <- 24 # Number of rolling horizons
 
-# Geef hier de te testen modellen aan.
-# Het script zal op zoek gaan naar de functie "train_naam" om het model te 
-# trainen en "pred_naam" om te voorspellen met het model, waar 'naam' 
-# de aangegeven naam in de onderstaande vector is.
+# Indicate the models that should be tested.
+# The script will look for the functions "train_name" to train the model and 
+# "pred_naam" to predict with the model, where 'name' is the name that is
+# indicated in MODEL_VECTOR.
 MODEL_VECTOR <- c("arima1")
-# R bestanden met de bijbehorende functie-definities kunnen ook in dit 
-# bestand ge-'source'-d worden.
+
+# The R files containing the model definitions can be sourced in this file. 
+source("./R/modellen.R")
+source("./R/modellen-arima.R")
+source("./R/modellen-expsmooth.R")
