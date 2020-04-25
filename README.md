@@ -43,4 +43,6 @@ Distributed under the GPL 3 license. See ``LICENSE`` for more information.
 
 ## Meta
 Authors: Alexander Harms.
-Based on a project by Pauline Sluijpers and myself.
+Based on a project by Pauline Sluijpers and myself. The code for that project
+(in Dutch) can be found at
+[https://github.com/alexanderharms/timsR-dutch](https://github.com/alexanderharms/timsR-dutch).
