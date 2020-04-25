@@ -1,6 +1,6 @@
 # ARIMA -----------------------------------------------------------------------
-train_arima <- function(doelreeks, regressor=NULL){
-  x <- na.trim.ts(doelreeks)
+train_arima <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
   
   if (is.null(regressor)) {
     # modelarima <- stats::arima(x, order = c(1L, 1L, 1L))
@@ -18,7 +18,7 @@ train_arima <- function(doelreeks, regressor=NULL){
     # modelarima <- arima(x, order = c(1L, 1L, 1L))
     modelarima <- arima(x, order = c(1L, 1L, 1L),
                         seasonal = list(order = c(1L, 0L, 1L), period = NA),
-                        xreg = regressor[1:(length(x)),], 
+                        xreg = regressors[1:(length(x)),], 
                         include.mean = TRUE,
                         transform.pars = TRUE,
                         fixed = NULL, init = NULL,
@@ -34,11 +34,11 @@ train_arima <- function(doelreeks, regressor=NULL){
 }
 
 pred_arima <- function(model, h) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
+  # prediction <- model %>% forecast(h=h) %>% .$mean
   prediction <- model %>% 
     predict(n.ahead=h, se.fit = TRUE) 
   
-  return_df <- data.frame("voorspelling" = prediction$pred,
+  return_df <- data.frame("prediction" = prediction$pred,
                           "lower_conf" = prediction$pred - 1.96*prediction$se,
                           "upper_conf" = prediction$pred + 1.96*prediction$se)
   
@@ -46,8 +46,8 @@ pred_arima <- function(model, h) {
 }
 
 # Holt - Winters --------------------------------------------------------------
-train_holtwinters <- function(doelreeks) {
-  x <- na.trim.ts(doelreeks)
+train_holtwinters <- function(target_series) {
+  x <- na.trim.ts(target_series)
   
   model_hw <- HoltWinters(x, alpha = NULL, beta = NULL, gamma = NULL,
                           seasonal = c("additive", "multiplicative"),
@@ -67,7 +67,7 @@ pred_holtwinters <- function(model, h) {
     predict(n.ahead = h, prediction.interval = TRUE,
             level = 0.95)
   
-  return_df <- data.frame("voorspelling" = prediction[, "fit"],
+  return_df <- data.frame("prediction" = prediction[, "fit"],
                           "lower_conf" = prediction[, "lwr"],
                           "upper_conf" = prediction[, "upr"])
   
@@ -75,8 +75,8 @@ pred_holtwinters <- function(model, h) {
 }
 
 # Naiëf model -----------------------------------------------------------
-train_naief <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_naief <- function(target_series){
+  x <- na.trim.ts(target_series)
   return(x)
   
 }
@@ -85,7 +85,7 @@ pred_naief <- function(x, h) {
   prediction <- naive(x, h=h, level=c(80, 95), fan=FALSE, lambda=NULL)
   print(summary(prediction))
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
@@ -93,8 +93,8 @@ pred_naief <- function(x, h) {
 
 # Seizoens naief model (snaief) -----------------------------------------
 
-train_snaief <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_snaief <- function(target_series){
+  x <- na.trim.ts(target_series)
   return(x)
 }
 
@@ -102,15 +102,15 @@ pred_snaief <- function(x, h) {
   prediction <- snaive(x, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
   print(summary(prediction))
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
 }
 
 # Exponentional Smoothing -------------------------------------------------
-train_exp_smooth <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_exp_smooth <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   model_exp_smooth <- ets(x, model="ZZZ", damped=NULL, 
                     alpha=NULL, beta=NULL, gamma=NULL, phi=NULL, 
@@ -129,7 +129,7 @@ train_exp_smooth <- function(doelreeks){
 
 pred_exp_smooth <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)

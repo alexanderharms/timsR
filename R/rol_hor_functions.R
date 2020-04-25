@@ -7,9 +7,14 @@ rol_hor_model_loop <- function(target_series, MODEL_VECTOR, STARTTEST,
   metrics <- data.frame("Model name" = c(), 
                         "ME" = c(), "RMSE" = c(), "MAE" = c(), 
                         "MPE" = c(), "MAPE" = c())
-  # metrics_aggr <- data.frame("Model name" = c(), 
-  #                            "ME" = c(), "RMSE" = c(), "MAE" = c(), 
-  #                            "MPE" = c(), "MAPE" = c())
+  if (check_aggr()) {
+    metrics_aggr <- data.frame("Model name" = c(), 
+                               "ME" = c(), "RMSE" = c(), "MAE" = c(), 
+                               "MPE" = c(), "MAPE" = c())
+  } else {
+    metrics_aggr <- NULL
+  }
+
   error_models <- c()
   
   # Loop over the models in MODEL_VECTOR
@@ -18,8 +23,8 @@ rol_hor_model_loop <- function(target_series, MODEL_VECTOR, STARTTEST,
     
     # For every model a train- and a prediction-function should be defined. They
     # should start with "train_" and "pred_" respectively.
-    train_fun <- paste0("train_", model_naam)
-    pred_fun  <- paste0("pred_", model_naam)
+    train_fun <- paste0("train_", model_name)
+    pred_fun  <- paste0("pred_", model_name)
     
     metrics_list <- NULL
     
@@ -46,17 +51,18 @@ rol_hor_model_loop <- function(target_series, MODEL_VECTOR, STARTTEST,
                MAE = MAE %>% as.character() %>% as.numeric(),
                MPE = MPE %>% as.character() %>% as.numeric(),
                MAPE = MAPE %>% as.character() %>% as.numeric())
-      
-      # metrics_aggr <- rbind(metrics_aggr, cbind(model_name, rol_hor_list$metrics), 
-      #                  make.row.names = FALSE) %>%
-      #   mutate(ME = ME %>% as.character() %>% as.numeric(),
-      #          RMSE = RMSE %>% as.character() %>% as.numeric(),
-      #          MAE = MAE %>% as.character() %>% as.numeric(),
-      #          MPE = MPE %>% as.character() %>% as.numeric(),
-      #          MAPE = MAPE %>% as.character() %>% as.numeric())
+      if (check_aggr()) {
+        metrics_aggr <- rbind(metrics_aggr, cbind(model_name, rol_hor_list$metrics), 
+                         make.row.names = FALSE) %>%
+          mutate(ME = ME %>% as.character() %>% as.numeric(),
+                 RMSE = RMSE %>% as.character() %>% as.numeric(),
+                 MAE = MAE %>% as.character() %>% as.numeric(),
+                 MPE = MPE %>% as.character() %>% as.numeric(),
+                 MAPE = MAPE %>% as.character() %>% as.numeric())
+      } 
       
       metrics_list <- list("metrics" = metrics,
-                           # "metrics_aggr" = metrics_aggr,
+                           "metrics_aggr" = metrics_aggr,
                            "error_models" = error_models)
     },
     # If the rolling horizon gives an error, add the model name to the vector
@@ -65,19 +71,19 @@ rol_hor_model_loop <- function(target_series, MODEL_VECTOR, STARTTEST,
       error_models <- c(error_models, model_name)
       print(cond) # Print the error
       return(list("metrics" = metrics, 
-                  # "metrics_aggr" = metrics_aggr, 
+                  "metrics_aggr" = metrics_aggr, 
                   "error_models" = error_models))
     })
     
     if (!is.null(metrics_list)) {
       metrics <- metrics_list$metrics
-     # metrics_aggr <- metrics_list$metrics_aggr
+      metrics_aggr <- metrics_list$metrics_aggr
       error_models  <- metrics_list$error_models
     }
   }
   
   return(list("metrics" = metrics, 
-              # "metrics_aggr" = metrics_aggr, 
+              "metrics_aggr" = metrics_aggr, 
               "error_models" = error_models))
 }
 
@@ -101,9 +107,11 @@ rolling_horizon <- function(series, FUN, FUN_PRED, start_eval,
   if (is.character(FUN_PRED)) FUN_PRED <- get(FUN_PRED)
   
   nowcasts <- data.frame("actual" = c(), 
-                         "predictions" = c())
-  # nowcasts_aggr <- data.frame("actual" = c(), 
-  #                             "predictions" = c())
+                         "prediction" = c())
+  if (check_aggr()) {
+    nowcasts_aggr <- data.frame("actual" = c(), 
+                                "prediction" = c())
+  }
   
   plot_data <- list()
   trained_models <- list()
@@ -111,7 +119,7 @@ rolling_horizon <- function(series, FUN, FUN_PRED, start_eval,
     # The -1 makes sure that the start_eval-date is taken as the first value for
     # i = 0.
     # tsp(series)[3] is the frequency of the series
-    enddate <- start_eval[1] + (start_eval[2] - 1 + i)/tsp(series)[3]
+    enddate <- start_eval[1] + (start_eval[2] + h - 1 + i)/tsp(series)[3]
     series_nieuw <- window(series, end = enddate)
     actual <- series_nieuw[(length(series_nieuw) - h + 1):length(series_nieuw)]
     series_nieuw[(length(series_nieuw) - h + 1):length(series_nieuw)] <- NA
@@ -131,8 +139,6 @@ rolling_horizon <- function(series, FUN, FUN_PRED, start_eval,
     }
     trained_models[[i+1]] <- trained_model
     
-    # FUN_PRED geeft een data frame terug met de voorspelling en de 95 procent
-    # betrouwbaarheidsintervallen.
     # FUN_PRED returns a data frame with the prediction and the 95% confidence
     # interval. 
     if (!is.null(regressors)){
@@ -144,14 +150,15 @@ rolling_horizon <- function(series, FUN, FUN_PRED, start_eval,
     
     actual_pred <- cbind(actual, prediction)
     
-    # actual_aggr <- aggr_fun(actual)
-    # prediction_aggr <- aggr_fun(actual)
-    # actual_pred_aggr <- cbind(actual_aggr, prediction_aggr)
-    
     nowcasts <- rbind(nowcasts, actual_pred)
-    nowcasts_aggr <- rbind(nowcasts_aggr, actual_pred_aggr)
+
+    if (check_aggr()) {
+      actual_aggr <- aggr_fun(actual)
+      prediction_aggr <- aggr_fun(actual)
+      actual_pred_aggr <- cbind(actual_aggr, prediction_aggr)
+      nowcasts_aggr <- rbind(nowcasts_aggr, actual_pred_aggr)
+    } 
     
-    # Geef plot_data tijdsinformatie mee om later als tijdreeks te plotten
     # Accompany plot_data with time information to later plot it as a time
     # series.
     date_vector <- enddate +
@@ -159,12 +166,15 @@ rolling_horizon <- function(series, FUN, FUN_PRED, start_eval,
     plot_data[[i+1]] <- cbind(actual, return_df, date_vector)
   }
   
-  # Bereken de metrieken op basis van de echte waarde en de voorspelling.
   # Calculate the metrics based on the actual value and the prediction
   metrics <- accuracy(nowcasts[, 'actual'], 
                       nowcasts[, 'prediction'])
-  # metrics_aggr <- accuracy(nowcasts_aggr[, 'actual'], 
-  #                          nowcasts_aggr[, 'prediction'])
+  if (check_aggr()) {
+    metrics_aggr <- accuracy(nowcasts_aggr[, 'actual'], 
+                             nowcasts_aggr[, 'prediction'])
+  } else {
+    metrics_aggr <- NULL
+  }
   
   return(list("metrics" = metrics, 
               "metrics_aggr" = metrics_aggr, 

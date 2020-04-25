@@ -1,8 +1,8 @@
 # Exponentional smoothing modellen ------------------------------------------------------------------
 
 # Algemene Exponentional Smoothing functie
-train_exp_smooth <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_exp_smooth <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   modelexp_smooth <- ets(x, model="ZZZ", damped=NULL, 
                          alpha=NULL, beta=NULL, gamma=NULL, phi=NULL, 
@@ -22,15 +22,15 @@ train_exp_smooth <- function(doelreeks){
 
 pred_exp_smooth <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
 }
 
 # Model 0: automatisch exponential smoothing model
-train_exp_smooth1 <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_exp_smooth1 <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   modelexp_smooth1 <- ets(x)
   print(summary(modelexp_smooth1))
@@ -40,7 +40,7 @@ train_exp_smooth1 <- function(doelreeks){
 
 pred_exp_smooth1 <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
@@ -48,8 +48,8 @@ pred_exp_smooth1 <- function(model, h) {
 
 
 # Model 1: Holt - Winters - additief - met HoltWinters() functie 
-train_holtwinters <- function(doelreeks) {
-  x <- na.trim.ts(doelreeks)
+train_holtwinters <- function(target_series) {
+  x <- na.trim.ts(target_series)
   
   model_hw <- HoltWinters(x, alpha = NULL, beta = NULL, gamma = NULL,
                           seasonal = "additive",
@@ -63,7 +63,7 @@ pred_holtwinters <- function(model, h) {
     predict(n.ahead = h, prediction.interval = TRUE,
             level = 0.95)
   
-  return_df <- data.frame("voorspelling" = prediction[, "fit"],
+  return_df <- data.frame("prediction" = prediction[, "fit"],
                           "lower_conf" = prediction[, "lwr"],
                           "upper_conf" = prediction[, "upr"])
   
@@ -71,8 +71,8 @@ pred_holtwinters <- function(model, h) {
 }
 
 # Model 2 Holt - Winters - multiplicatief - met HoltWinters() functie
-train_holtwinters2 <- function(doelreeks) {
-  x <- na.trim.ts(doelreeks)
+train_holtwinters2 <- function(target_series) {
+  x <- na.trim.ts(target_series)
   
   model_hw2 <- HoltWinters(x, alpha = NULL, beta = NULL, gamma = NULL,
                           seasonal = c("mult"),
@@ -92,7 +92,7 @@ pred_holtwinters2 <- function(model, h) {
     predict(n.ahead = h, prediction.interval = TRUE,
             level = 0.95)
   
-  return_df <- data.frame("voorspelling" = prediction[, "fit"],
+  return_df <- data.frame("prediction" = prediction[, "fit"],
                           "lower_conf" = prediction[, "lwr"],
                           "upper_conf" = prediction[, "upr"])
   
@@ -100,8 +100,8 @@ pred_holtwinters2 <- function(model, h) {
 }
 
 # Model 3: Holt - Winters - additief - met ets() functie
-train_holtwinters3 <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_holtwinters3 <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   model_hw3 <- ets(x, model="AAA")
   print(summary(model_hw3))
@@ -111,15 +111,15 @@ train_holtwinters3 <- function(doelreeks){
 
 pred_holtwinters3 <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
 }
 
 # Model 4: Holt - Winters - multiplicatief - met ets() functie
-train_holtwinters4 <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_holtwinters4 <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   model_hw4 <- ets(x, model="MAM")
   print(summary(model_hw4))
@@ -129,7 +129,7 @@ train_holtwinters4 <- function(doelreeks){
 
 pred_holtwinters4 <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
@@ -137,8 +137,8 @@ pred_holtwinters4 <- function(model, h) {
 
 # Model 5: Simple Exponentional Smoothing - Alleen het niveau van de reeks 
 # wordt geschat
-train_s_exp_smooth <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_s_exp_smooth <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   models_exp_smooth <- ets(x, model="ANN")
   print(summary(models_exp_smooth))
@@ -148,15 +148,15 @@ train_s_exp_smooth <- function(doelreeks){
 
 pred_s_exp_smooth <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
 }
  
 # Model 6: Holt - Niveau en trend worden geschat
-train_holt <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_holt <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   modelholt <- ets(x, model="AAN")
   print(summary(modelholt))
@@ -166,15 +166,15 @@ train_holt <- function(doelreeks){
 
 pred_holt <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
 }
 
 # Model 7: Holt Winters Additief zonder trend
-train_holtwinters5 <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_holtwinters5 <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   modelholtwinters5 <- ets(x, model="ANA")
   print(summary(modelholtwinters5))
@@ -184,15 +184,15 @@ train_holtwinters5 <- function(doelreeks){
 
 pred_holtwinters5 <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)
 }
 
 # Model 8: Holt Winters multiplicatief zonder trend
-train_holtwinters6 <- function(doelreeks){
-  x <- na.trim.ts(doelreeks)
+train_holtwinters6 <- function(target_series){
+  x <- na.trim.ts(target_series)
   
   modelholtwinters6 <- ets(x, model="MNM")
   print(summary(modelholtwinters6))
@@ -202,7 +202,7 @@ train_holtwinters6 <- function(doelreeks){
 
 pred_holtwinters6 <- function(model, h) {
   prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, lambda=NULL)
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   return(return_df)

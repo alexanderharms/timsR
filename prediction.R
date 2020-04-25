@@ -99,4 +99,4 @@ sink()
 # Opslaan van het dataframe met de gemaakte voorspelling
 predict_csv <- substr(LOGFILE, start = 1, stop = nchar(LOGFILE) - 4) %>%
   paste0("_prediction.csv")
-write.csv2(prediction_df, file = predict_csv, row.names = FALSE)
+write.csv(prediction_df, file = predict_csv, row.names = FALSE)

@@ -1,8 +1,8 @@
 # Alle ARIMA modellen --------------------------------------------------------
-train_arima <- function(doelreeks, regressor = NULL){
-  x <- na.trim.ts(doelreeks)
+train_arima <- function(target_series, regressors = NULL){
+  x <- na.trim.ts(target_series)
   
-  if (is.null(regressor)) {
+  if (is.null(regressors)) {
     # modelarima <- stats::arima(x, order = c(1L, 1L, 1L))
     modelarima <- arima(x, order = c(1L, 1L, 1L),
                         seasonal = list(order = c(1L, 0L, 1L), period = NA),
@@ -18,7 +18,7 @@ train_arima <- function(doelreeks, regressor = NULL){
     # modelarima <- arima(x, order = c(1L, 1L, 1L))
     modelarima <- arima(x, order = c(1L, 1L, 1L),
                         seasonal = list(order = c(1L, 0L, 1L), period = NA),
-                        xreg = regressor[1:(length(x)),], 
+                        xreg = regressors[1:(length(x)),], 
                         include.mean = TRUE,
                         transform.pars = TRUE,
                         fixed = NULL, init = NULL,
@@ -34,11 +34,10 @@ train_arima <- function(doelreeks, regressor = NULL){
 }
 
 pred_arima <- function(model, h) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
   prediction <- model %>% 
     predict(n.ahead=h, se.fit = TRUE) 
   
-  return_df <- data.frame("voorspelling" = prediction$pred,
+  return_df <- data.frame("prediction" = prediction$pred,
                           "lower_conf" = prediction$pred - 1.96*prediction$se,
                           "upper_conf" = prediction$pred + 1.96*prediction$se)
   
@@ -46,13 +45,13 @@ pred_arima <- function(model, h) {
 }
 
 # Arima model 1: non seasonal auto arima
-train_arima1 <- function(doelreeks, regressoren = NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)) {
+train_arima1 <- function(target_series, regressors = NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)) {
     modelarima1 <- auto.arima(x, seasonal = FALSE, allowdrift = TRUE) 
   } else {
     modelarima1 <- auto.arima(x, seasonal = FALSE, allowdrift = TRUE, 
-                              xreg = regressoren)
+                              xreg = regressors)
   }
   
   print(summary(modelarima1))
@@ -60,17 +59,16 @@ train_arima1 <- function(doelreeks, regressoren = NULL){
 }
 
 
-pred_arima1 <- function(model, h, regressoren=NULL) {
-# voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){ 
+pred_arima1 <- function(model, h, regressors=NULL) {
+  if (is.null(regressors)){ 
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -78,13 +76,13 @@ pred_arima1 <- function(model, h, regressoren=NULL) {
 }
 
 # Arima model 2: seasonal auto arima
-train_arima2 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima2 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima2 <- auto.arima(x, seasonal=TRUE, allowdrift=TRUE)
   } else {
     modelarima2 <- auto.arima(x, seasonal=TRUE, allowdrift=TRUE, 
-                              xreg=regressoren)
+                              xreg=regressors)
   } 
   
   print(summary(modelarima2))
@@ -92,17 +90,16 @@ train_arima2 <- function(doelreeks, regressoren=NULL){
 }
 
 
-pred_arima2 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){ 
+pred_arima2 <- function(model, h, regressors=NULL) {
+  if (is.null(regressors)){ 
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -110,10 +107,10 @@ pred_arima2 <- function(model, h, regressoren=NULL) {
 }
 
 # Arima model 3: seasonal model handmatig gespecificeerd
-train_arima3 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
+train_arima3 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
   
-  if (is.null(regressoren)){
+  if (is.null(regressors)){
     modelarima3 <- Arima(x, order = c(2, 1, 2),
                          seasonal = list(order = c(1, 1, 0), period = 12),
                          xreg = NULL, 
@@ -123,7 +120,7 @@ train_arima3 <- function(doelreeks, regressoren=NULL){
   } else { 
     modelarima3 <- Arima(x, order = c(2, 1, 2),
                          seasonal = list(order = c(1, 1, 0), period = 12),
-                         xreg = regressoren, 
+                         xreg = regressors, 
                          include.mean = TRUE,
                          include.drift = FALSE,
                          method = "CSS-ML")
@@ -133,17 +130,17 @@ train_arima3 <- function(doelreeks, regressoren=NULL){
   return(modelarima3)
 }
 
-pred_arima3 <- function(model, h, regressoren = NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima3 <- function(model, h, regressors = NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -152,9 +149,9 @@ pred_arima3 <- function(model, h, regressoren = NULL) {
 
 # Model 5: handmatig gespecificeerd model met Arima() i.p.v. arima() om 
 # verschil te bekijken
-train_arima5 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima5 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima5 <- Arima(x, order = c(2, 1, 2),
                          seasonal = list(order = c(2, 1, 0), period = 12),
                          xreg = NULL, 
@@ -164,7 +161,7 @@ train_arima5 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima5 <- Arima(x, order = c(2, 1, 2),
                          seasonal = list(order = c(2, 1, 0), period = 12),
-                         xreg = regressoren, 
+                         xreg = regressors, 
                          include.mean = TRUE,
                          include.drift = FALSE,
                          method = "CSS")
@@ -173,16 +170,16 @@ train_arima5 <- function(doelreeks, regressoren=NULL){
   return(modelarima5)
 }
 
-pred_arima5 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima5 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -190,9 +187,9 @@ pred_arima5 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 6: non-seasonal, handmatig gespecificeerd 
-train_arima6 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima6 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima6 <- Arima(x, order = c(4, 0, 1),
                          xreg = NULL, 
                          include.mean = TRUE,
@@ -200,7 +197,7 @@ train_arima6 <- function(doelreeks, regressoren=NULL){
                          method = "CSS-ML")
   } else {
     modelarima6 <- Arima(x, order = c(4, 0, 1),
-                         xreg = regressoren, 
+                         xreg = regressors, 
                          include.mean = TRUE,
                          include.drift = FALSE,
                          method = "CSS-ML")
@@ -209,16 +206,16 @@ train_arima6 <- function(doelreeks, regressoren=NULL){
   return(modelarima6)
 }
 
-pred_arima6 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima6 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -226,9 +223,9 @@ pred_arima6 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 7: seasonal model, handmatig gespecificeerd 
-train_arima7 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima7 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima7 <- Arima(x, order = c(3, 0, 0),
                          seasonal = list(order = c(2, 1, 0), period = 12),
                          xreg = NULL, 
@@ -238,7 +235,7 @@ train_arima7 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima7 <- Arima(x, order = c(3, 0, 0),
                          seasonal = list(order = c(2, 1, 0), period = 12),
-                         xreg = regressoren, 
+                         xreg = regressors, 
                          include.mean = TRUE,
                          include.drift = TRUE,
                          method = "CSS-ML")
@@ -247,16 +244,16 @@ train_arima7 <- function(doelreeks, regressoren=NULL){
   return(modelarima7)
 }
 
-pred_arima7 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima7 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -264,9 +261,9 @@ pred_arima7 <- function(model, h, regressoren=NULL) {
 }
 
 # Seasonal model zonder drift, handmatig gespecificeerd 
-train_arima8 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima8 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima8 <- Arima(x, order = c(1, 1, 3),
                          seasonal = list(order = c(0, 1, 0), period = 12),
                          xreg = NULL, 
@@ -276,7 +273,7 @@ train_arima8 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima8 <- Arima(x, order = c(1, 1, 3),
                          seasonal = list(order = c(0, 1, 0), period = 12),
-                         xreg = regressoren, 
+                         xreg = regressors, 
                          include.mean = TRUE,
                          include.drift = FALSE,
                          method = "CSS-ML")
@@ -285,16 +282,16 @@ train_arima8 <- function(doelreeks, regressoren=NULL){
   return(modelarima8)
 }
 
-pred_arima8 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima8 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -302,9 +299,9 @@ pred_arima8 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 9: seasonal model zonder drift, handmatig gespecificeerd 
-train_arima9 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima9 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima9<- Arima(x, order = c(2, 1, 2),
                         seasonal = list(order = c(0, 1, 0), period = 12),
                         xreg = NULL, 
@@ -314,7 +311,7 @@ train_arima9 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima9<- Arima(x, order = c(2, 1, 2),
                         seasonal = list(order = c(0, 1, 0), period = 12),
-                        xreg = regressoren, 
+                        xreg = regressors, 
                         include.mean = TRUE,
                         include.drift = FALSE,
                         method = "CSS-ML")
@@ -323,17 +320,17 @@ train_arima9 <- function(doelreeks, regressoren=NULL){
   return(modelarima9)
 }
 
-pred_arima9 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima9 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }  
     
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -341,9 +338,9 @@ pred_arima9 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 10: seasonal model zonder drift, handmatig gespecificeerd
-train_arima10 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima10 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima10 <- Arima(x, order = c(2, 1, 2),
                           seasonal = list(order = c(2, 1, 1), period = 12),
                           xreg = NULL, 
@@ -353,7 +350,7 @@ train_arima10 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima10 <- Arima(x, order = c(2, 1, 2),
                           seasonal = list(order = c(2, 1, 1), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = FALSE,
                           method = "CSS-ML")
@@ -362,17 +359,17 @@ train_arima10 <- function(doelreeks, regressoren=NULL){
   return(modelarima10)
 }
 
-pred_arima10 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima10 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }  
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -380,9 +377,9 @@ pred_arima10 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 11: seasonal model zonder drift, handmatig gespecificeerd 
-train_arima11 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima11 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima11 <- Arima(x, order = c(2, 1, 1),
                           seasonal = list(order = c(2, 1, 1), period = 12),
                           xreg = NULL, 
@@ -392,7 +389,7 @@ train_arima11 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima11 <- Arima(x, order = c(2, 1, 1),
                           seasonal = list(order = c(2, 1, 1), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = FALSE,
                           method = "CSS-ML")
@@ -401,17 +398,17 @@ train_arima11 <- function(doelreeks, regressoren=NULL){
   return(modelarima11)
 }
 
-pred_arima11 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima11 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -419,10 +416,10 @@ pred_arima11 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 12: seasonal model zonder drift, handmatig gespecificeerd 
-train_arima12 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
+train_arima12 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
   
-  if (is.null(regressoren)){
+  if (is.null(regressors)){
     modelarima12 <- Arima(x, order = c(2, 1, 1),
                           seasonal = list(order = c(2, 1, 0), period = 12),
                           xreg = NULL, 
@@ -432,7 +429,7 @@ train_arima12 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima12 <- Arima(x, order = c(2, 1, 1),
                           seasonal = list(order = c(2, 1, 0), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = FALSE,
                           method = "CSS-ML")
@@ -441,17 +438,17 @@ train_arima12 <- function(doelreeks, regressoren=NULL){
   return(modelarima12)
 }
 
-pred_arima12 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima12 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -459,9 +456,9 @@ pred_arima12 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 13: Seasonal model met drift, handmatig gespecificeerd
-train_arima13 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima13 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima13 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
                           xreg = NULL, 
@@ -471,7 +468,7 @@ train_arima13 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima13 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = TRUE,
                           method = "CSS-ML")
@@ -480,16 +477,16 @@ train_arima13 <- function(doelreeks, regressoren=NULL){
   return(modelarima13)
 }
 
-pred_arima13 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima13 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -497,9 +494,9 @@ pred_arima13 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 14: seasonal model met drift, handmatig gespecificeerd
-train_arima14 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima14 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima14 <- Arima(x, order = c(2, 0, 2),
                           seasonal = list(order = c(1, 1, 2), period = 12),
                           xreg = NULL, 
@@ -509,7 +506,7 @@ train_arima14 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima14 <- Arima(x, order = c(2, 0, 2),
                           seasonal = list(order = c(1, 1, 2), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = TRUE,
                           method = "CSS-ML")
@@ -518,17 +515,17 @@ train_arima14 <- function(doelreeks, regressoren=NULL){
   return(modelarima14)
 }
 
-pred_arima14 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima14 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }  
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -537,9 +534,9 @@ pred_arima14 <- function(model, h, regressoren=NULL) {
 
 
 # Model 15: seasonal model met drift, handmatig gespecificeerd
-train_arima15 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima15 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima15 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(1, 1, 2), period = 12),
                           xreg = NULL, 
@@ -549,7 +546,7 @@ train_arima15 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima15 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(1, 1, 2), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = TRUE,
                           method = "CSS-ML")
@@ -558,17 +555,17 @@ train_arima15 <- function(doelreeks, regressoren=NULL){
   return(modelarima15)
 }
 
-pred_arima15 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima15 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }  
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -576,9 +573,9 @@ pred_arima15 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 16: seasonal model met drift, handmatig gespecificeerd
-train_arima16 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima16 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima16 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
                           xreg = NULL, 
@@ -588,7 +585,7 @@ train_arima16 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima16 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = TRUE,
                           method = "CSS-ML")
@@ -597,17 +594,17 @@ train_arima16 <- function(doelreeks, regressoren=NULL){
   return(modelarima16)
 }
 
-pred_arima16 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima16 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -615,9 +612,9 @@ pred_arima16 <- function(model, h, regressoren=NULL) {
 }
 
 # Model 17: seasonal model met drift, handmatig gespecificeerd
-train_arima17 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima17 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima17 <- Arima(x, order = c(2, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
                           xreg = NULL, 
@@ -627,7 +624,7 @@ train_arima17 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima17 <- Arima(x, order = c(2, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = TRUE,
                           method = "CSS-ML")
@@ -637,26 +634,26 @@ train_arima17 <- function(doelreeks, regressoren=NULL){
   return(modelarima17)
 }
 
-pred_arima17 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima17 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
   return(return_df)
 }
 
-train_arima18 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima18 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima18 <- Arima(x, order = c(1, 1, 1),
                           seasonal = list(order = c(0, 1, 1), period = 12),
                           xreg = NULL, 
@@ -666,7 +663,7 @@ train_arima18 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima18 <- Arima(x, order = c(1, 1, 1),
                           seasonal = list(order = c(0, 1, 1), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = FALSE,
                           method = "CSS-ML")
@@ -675,17 +672,16 @@ train_arima18 <- function(doelreeks, regressoren=NULL){
   return(modelarima18)
 }
 
-pred_arima18 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima18 <- function(model, h, regressors=NULL) {
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
@@ -693,9 +689,9 @@ pred_arima18 <- function(model, h, regressoren=NULL) {
 }
 
 # 
-train_arima19 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima19 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima19 <- Arima(x, order = c(2, 0, 1),
                           seasonal = list(order = c(0, 1, 1), period = 12),
                           xreg = NULL, 
@@ -705,7 +701,7 @@ train_arima19 <- function(doelreeks, regressoren=NULL){
   } else {
     modelarima19 <- Arima(x, order = c(2, 0, 1),
                           seasonal = list(order = c(0, 1, 1), period = 12),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = TRUE,
                           include.drift = FALSE,
                           method = "CSS-ML")
@@ -714,26 +710,26 @@ train_arima19 <- function(doelreeks, regressoren=NULL){
   return(modelarima19)
 }
 
-pred_arima19 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima19 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   
   return(return_df)
 }
 
-train_arima20 <- function(doelreeks, regressoren=NULL){
-  x <- na.trim.ts(doelreeks)
-  if (is.null(regressoren)){
+train_arima20 <- function(target_series, regressors=NULL){
+  x <- na.trim.ts(target_series)
+  if (is.null(regressors)){
     modelarima20 <- Arima(x, order = c(4, 1, 3),
                           xreg = NULL, 
                           include.mean = FALSE,
@@ -741,7 +737,7 @@ train_arima20 <- function(doelreeks, regressoren=NULL){
                           method = "ML")
   } else {
     modelarima20 <- Arima(x, order = c(4, 1, 3),
-                          xreg = regressoren, 
+                          xreg = regressors, 
                           include.mean = FALSE,
                           include.drift = TRUE,
                           method = "ML")
@@ -750,17 +746,17 @@ train_arima20 <- function(doelreeks, regressoren=NULL){
   return(modelarima20)
 }
 
-pred_arima20 <- function(model, h, regressoren=NULL) {
-  # voorspelling <- model %>% forecast(h=h) %>% .$mean
-  if (is.null(regressoren)){
+pred_arima20 <- function(model, h, regressors=NULL) {
+  # prediction <- model %>% forecast(h=h) %>% .$mean
+  if (is.null(regressors)){
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
                            lambda=NULL)
   } else {
     prediction <- forecast(model, h=h, level=c(80,95), fan = FALSE, 
-                           lambda=NULL, xreg=regressoren)
+                           lambda=NULL, xreg=regressors)
   }  
   
-  return_df <- data.frame("voorspelling" = prediction$mean,
+  return_df <- data.frame("prediction" = prediction$mean,
                           "lower_conf" = prediction$lower[,2],
                           "upper_conf" = prediction$upper[,2])
   

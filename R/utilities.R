@@ -1,22 +1,29 @@
-# Inlezen data   --------------------------------------------------------------
-#' Read data CSV
-#' 
-#' Leest tijdreeksen in van CSV; geeft een dataframe terug met als kolommen
-#' de doelvariabele, de hulpvariabelen en eventueel kolommen met een
-#' tijdsindicatie.
+# # Inlezen data   --------------------------------------------------------------
+# #' Read data CSV
+# #' 
+# #' Leest tijdreeksen in van CSV; geeft een dataframe terug met als kolommen
+# #' de doelvariabele, de hulpvariabelen en eventueel kolommen met een
+# #' tijdsindicatie.
+# inlezen_data_csv <- function(DATAPAD, DATABESTAND, csv_sep = ';') {
+#   if (csv_sep == ',') {
+#     input_data <- read.csv(paste(DATAPAD, DATABESTAND, sep = ""),
+#                            stringsAsFactors = FALSE)
+#   } else {
+#     input_data <- read.csv2(paste(DATAPAD, DATABESTAND, sep = ""),
+#                             stringsAsFactors = FALSE)
+#   }
+#   return(input_data)
+# }
 
-inlezen_data_csv <- function(DATAPAD, DATABESTAND, csv_sep = ';') {
-  if (csv_sep == ',') {
-    input_data <- read.csv(paste(DATAPAD, DATABESTAND, sep = ""),
-                           stringsAsFactors = FALSE)
-  } else {
-    input_data <- read.csv2(paste(DATAPAD, DATABESTAND, sep = ""),
-                            stringsAsFactors = FALSE)
-  }
-  return(input_data)
+#' Check aggregation function
+#'
+#' Checks existence of the aggregation function.
+check_aggr <- function() {
+    return(exists("aggr_fun"))
 }
 
 # Prepare time series  -------------------------------------------------------
+
 #' Prepare time series
 #'
 #' Reads in a data frame with columns for the target variable(s) and the
@@ -81,7 +88,7 @@ plot_rol_hor_list <- function(rol_hor_list, plot_title, freq,
       reeks <- item_ts[, 'actual']
     } 
     
-    ts.plot(reeks, item_ts[, 'predictions'], 
+    ts.plot(reeks, item_ts[, 'prediction'], 
             item_ts[, 'lower_conf'], item_ts[, 'upper_conf'], 
             gpars=list(main = plot_title,
                        col = c('black', 'red', 'blue', 'blue')))

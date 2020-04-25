@@ -60,27 +60,35 @@ model_loop <- rol_hor_model_loop(target_series, MODEL_VECTOR, STARTTEST,
 
 # Metrics --------------------------------------------------------------------
 metrics <- model_loop$metrics
-# metrics_aggr <- model_loop$metrics_aggr
+if (check_aggr()) {
+  metrics_aggr <- model_loop$metrics_aggr
+}
 # Sort the data frames with the metrics based on the RMSE value.
 metrics_sort <- metrics %>% dplyr::arrange(RMSE)
-# metrics_aggr_sort <- metrics_aggr %>% dplyr::arrange(RMSE)
+if (check_aggr()) {
+  metrics_aggr_sort <- metrics_aggr %>% dplyr::arrange(RMSE)
+}
 
 # Write the sorted metrics to the log file and the csv file.
 # Schrijf de data frames met metrieken weg naar het log bestand
 sink(LOGFILE, append = TRUE)
 print("Metrics:")
 print(metrics_sort)
-# print("Metrics aggregated:")
-# print(metrics_aggr_sort)
+if (check_aggr()) {
+  print("Metrics aggregated:")
+  print(metrics_aggr_sort)
+}
 print("Error models:")
 print(model_loop$error_models)
 sink()
 
 csv_filename <- substr(LOGFILE, start = 1, stop = nchar(LOGFILE) - 4) %>%
   paste0(".csv")
-# csv_filename_aggr <- substr(LOGFILE, start = 1, stop = nchar(LOGFILE) - 4) %>%
-#   paste0("_aggr.csv")
+csv_filename_aggr <- substr(LOGFILE, start = 1, stop = nchar(LOGFILE) - 4) %>%
+   paste0("_aggr.csv")
 
-write.csv2(metrics, file = csv_filename)
-#write.csv2(metrics_aggr, file = csv_filename)
+write.csv(metrics, file = csv_filename, row.names = FALSE)
+if (check_aggr()) {
+  write.csv(metrics_aggr, file = csv_filename_aggr, row.names = FALSE)
+}
 
