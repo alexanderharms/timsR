@@ -92,13 +92,17 @@ rol_hor_model_loop <- function(target_series, MODEL_VECTOR, STARTTEST,
 #' 
 #' Test time series models with the rolling horizon method.
 #' 
-#'  @param series Time series of the target variable.
-#'  @param FUN Training function, returns a model-object.
-#'  @param FUN_PRED Prediction function, returns a prediction.
-#'  @param start_eval Vector in the shape c(year, period) that form the last
-#'     point of the first rolling horizon.
-#'  @param eval_periods Number of rolling horizons.
-#'  @param h Horizon length.
+#'@param series Time series of the target variable.
+#'@param FUN Training function, returns a model-object.
+#'@param FUN_PRED Prediction function, returns a prediction.
+#'@param start_eval Vector in the shape c(year, period) that form the last
+#' point of the first rolling horizon.
+#'@param eval_periods Number of rolling horizons.
+#'@param h Horizon length.
+#'  
+#'@return A list of the metrics, data for plotting and the trained models.
+#'  
+#'@export
 rolling_horizon <- function(series, FUN, FUN_PRED, start_eval, 
                             eval_periods = 4, h = 14,regressors = NULL) {
   # If FUN or FUN_PRED are strings, then the corresponding functions are

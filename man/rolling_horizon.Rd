@@ -7,15 +7,23 @@
 rolling_horizon(series, FUN, FUN_PRED, start_eval, eval_periods = 4,
   h = 14, regressors = NULL)
 }
+\arguments{
+\item{series}{Time series of the target variable.}
+
+\item{FUN}{Training function, returns a model-object.}
+
+\item{FUN_PRED}{Prediction function, returns a prediction.}
+
+\item{start_eval}{Vector in the shape c(year, period) that form the last
+point of the first rolling horizon.}
+
+\item{eval_periods}{Number of rolling horizons.}
+
+\item{h}{Horizon length.}
+}
+\value{
+A list of the metrics, data for plotting and the trained models.
+}
 \description{
 Test time series models with the rolling horizon method.
-}
-\details{
-@param series Time series of the target variable.
- @param FUN Training function, returns a model-object.
- @param FUN_PRED Prediction function, returns a prediction.
- @param start_eval Vector in the shape c(year, period) that form the last
-    point of the first rolling horizon.
- @param eval_periods Number of rolling horizons.
- @param h Horizon length.
 }
