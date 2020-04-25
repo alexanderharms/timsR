@@ -6,10 +6,7 @@ source("./settings/settings.R")
 
 library(dplyr)
 library(zoo) 
-library(timeDate)  
-library(forecast)  
 library(magrittr)
-library(tseries)   
 
 source("./R/utilities.R")
 source("./R/rol_hor_functions.R")
@@ -61,26 +58,31 @@ train_fun <- paste0("train_", model_name) %>% get()
 pred_fun  <- paste0("pred_", model_name) %>% get()
 
 enddate <- STARTTEST[1] + (STARTTEST[2] - 1)/tsp(target_series)[3]
-target_series <- na.trim(target_series)
+target_series <- target_series %>% 
+  window(end = enddate) %>%
+  na.trim()
 
-if (is.null(regressors)){
+if (is.null(regressors)) {
   trained_model <- train_fun(target_series)
   prediction_df <- trained_model %>% pred_fun(H)
 } else {
   reg_train <- window(regressors, end = tsp(target_series)[2])
   
   trained_model <- train_fun(target_series, reg_train)
+  
+  reg_pred_start_date <- tsp(target_series)[2] + 1/tsp(target_series)[3]
+  reg_pred_end_date <- tsp(target_series)[2] + H/tsp(target_series)[3]
 
   reg_pred <- window(regressors,
-                     start = tsp(target_series)[2] 
-                     + 1/tsp(target_series)[3])
-  prediction_df <- trained_model %>% pred_fun(H, reg_pred)
+                     start = reg_pred_start_date,
+                     end = reg_pred_end_date)
+  prediction_df <- trained_model %>% pred_fun(h=H, regressors=reg_pred)
 }
 
 prediction <- prediction_df$prediction
 
 # Plot the prediction in red
-ts.plot(target_series, prediciton, gpars=list(col = c("black", "red")))
+ts.plot(target_series, prediction, gpars=list(col = c("black", "red")))
 
 # Make a data frame with the year, period and the corresponding prediction
 date_vector <- seq(end(target_series)[1] + (end(target_series)[2])/FREQ, 
@@ -89,9 +91,9 @@ date_vector <- seq(end(target_series)[1] + (end(target_series)[2])/FREQ,
 
 year_vec <- floor(date_vector) 
 period_vec <- round((date_vector - floor(date_vector)) * FREQ) + 1
-prediction_df <- data.frame("Year" = jaar_vec,
-                              "Period" = period_vec,
-                              "Prediction" = as.numeric(prediction))
+prediction_df <- data.frame("Year" = year_vec,
+                            "Period" = period_vec,
+                            "Prediction" = as.numeric(prediction))
 sink(LOGFILE, append = TRUE)
 print(prediction_df)
 sink()
