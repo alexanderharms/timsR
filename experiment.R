@@ -6,10 +6,7 @@ source("./settings/settings.R")
 
 library(dplyr)
 library(zoo) 
-library(timeDate)  
-library(forecast)  
 library(magrittr)
-library(tseries)   
 
 source("./R/utilities.R")
 source("./R/rol_hor_functions.R")

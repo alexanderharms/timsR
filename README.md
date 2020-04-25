@@ -8,21 +8,24 @@ Results of each test are stored in a log file and are written to CSV.
 
 ## Installation
 
-These scripts are written in R and depend on the packages:
+These scripts are written in R 3.6 and depends on the packages:
+* zoo
 * dplyr
 * magrittr.
+
+In the example 'auto.arima' is used; for this function the package 'forecast'
+needs to be installed.
 
 ## Usage example
 
 There are two scripts: 
-* experimenting.R: Used for testing various defined models.
+* experiment.R: Used for testing various defined models.
 * predict.R: When the best model is found, the settings file can be used in to
   use this model for predictions.
 
 In this repository an example is shown based on the dataset 'seatbelts.csv' from
 the package 'datasets'. The settings file is available in the folder 'settings'
 and the resulting log can be found in the 'logs' folder.
-
 
 ## Development and contributing
 
@@ -39,4 +42,5 @@ forking the repository and opening a pull request.
 Distributed under the GPL 3 license. See ``LICENSE`` for more information.
 
 ## Meta
-Authors: Alexander Harms and Pauline Sluijpers.
+Authors: Alexander Harms.
+Based on a project by Pauline Sluijpers and myself.

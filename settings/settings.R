@@ -22,8 +22,8 @@ STARTDATA <- c(1969, 1)
 # The starting date of the training set.
 STARTMODEL <- c(1969, 1) 
 
-# STARTTEST is the end point of the first rolling horizon test.
-STARTTEST <- c(1982, 1)
+# STARTTEST is the start point of the first rolling horizon test.
+STARTTEST <- c(1981, 1)
 
 H <- 12 # Prediction horizon
 N_TEST <- 24 # Number of rolling horizons
@@ -35,6 +35,12 @@ N_TEST <- 24 # Number of rolling horizons
 MODEL_VECTOR <- c("arima1")
 
 # The R files containing the model definitions can be sourced in this file. 
-source("./R/modellen.R")
-source("./R/modellen-arima.R")
-source("./R/modellen-expsmooth.R")
+source("./models/models-arima.R")
+
+# A aggregation function can be defined to allow prediction in a different
+# pattern than the training time series. The training time series can for
+# example be in months, but only the last year is of interest.
+# aggr_fun <- function(predictions) {
+#     pred_year <- sum(tail(predictions, 12))
+#     return(pred_year)
+# }

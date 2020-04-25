@@ -1,3 +1,4 @@
+library(forecast)
 # Alle ARIMA modellen --------------------------------------------------------
 train_arima <- function(target_series, regressors = NULL){
   x <- na.trim.ts(target_series)

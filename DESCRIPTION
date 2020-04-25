@@ -1,0 +1,17 @@
+Package: timsR
+Title: A testing setup for time series analysis. 
+Version: 0.1.0
+Authors@R: 
+    person(given = "Alexander",
+           family = "Harms",
+           role = c("aut", "cre"),
+           email = "a.g.j.harms@gmail.com")
+Description: Some scripts to easily iterate over models in time series analysis.
+License: GPL 3
+Encoding: UTF-8
+LazyData: true
+Imports:
+  magrittr,
+  dplyr,
+  zoo
+RoxygenNote: 6.1.1

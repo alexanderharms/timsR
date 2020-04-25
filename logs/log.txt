@@ -9,7 +9,7 @@
 [1] "Start of training set:"
 [1] 1969    1
 [1] "Start of test set:"
-[1] 1982    1
+[1] 1981    1
 [1] "Horizon:"
 [1] 12
 [1] "N_TEST:"
@@ -17,7 +17,7 @@
 [1] "Model vector:"
 [1] "arima1"
 [1] "Metrics:"
-  model_name       ME     RMSE      MAE      MPE     MAPE
-1     arima1 241.8977 355.1058 310.6343 14.75912 18.87069
+  model_name       ME    RMSE      MAE      MPE     MAPE
+1     arima1 139.2331 301.419 247.8437 8.261271 14.74274
 [1] "Error models:"
 NULL
