@@ -120,13 +120,11 @@ rolling_horizon <- function(series, FUN, FUN_PRED, start_eval,
   plot_data <- list()
   trained_models <- list()
   for (i in 0:(eval_periods - 1)) {
-    # The -1 makes sure that the start_eval-date is taken as the first value for
-    # i = 0.
     # tsp(series)[3] is the frequency of the series
-    enddate <- start_eval[1] + (start_eval[2] + h - 1 + i)/tsp(series)[3]
+    enddate <- start_eval[1] + (start_eval[2] - 1 + h - 1 + i)/tsp(series)[3]
     series_nieuw <- window(series, end = enddate)
-    actual <- series_nieuw[(length(series_nieuw) - h + 1):length(series_nieuw)]
-    series_nieuw[(length(series_nieuw) - h + 1):length(series_nieuw)] <- NA
+    actual <- series_nieuw[(length(series_nieuw) - (h - 1)):length(series_nieuw)]
+    series_nieuw[(length(series_nieuw) - (h - 1)):length(series_nieuw)] <- NA
 
     if (!is.null(regressors)) { 
         reg_train <- window(regressors, end = (enddate - h/tsp(series)[3]))
