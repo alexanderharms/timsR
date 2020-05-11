@@ -1,5 +1,5 @@
 ### A testing setup for time series analysis.
-# Authors: Alexander Harms, Pauline Sluijpers
+# Authors: Alexander Harms
 
 # To run experiments the settings need to be set.
 source("./settings/settings.R")
@@ -9,13 +9,13 @@ library(zoo)
 library(magrittr)
 
 source("./R/utilities.R")
+source("./R/tims.R")
 source("./R/rol_hor_functions.R")
 
 if (!exists("REGCOLUMNS")) REGCOLUMNS <- NULL
-
 if (!exists("STARTMODEL")) STARTMODEL <- STARTDATA
-
 if (!exists("LOGFILE")) LOGFILE <- "./logs/log.txt"
+if (!exists("aggr_fun")) aggr_fun <- NULL
 
 # Schrijf de settings weg naar een logbestand 
 sink(LOGFILE) 
@@ -25,18 +25,6 @@ print("Target:")
 print(TARGET_VAR)
 print("Regressors:")
 print(REGCOLUMNS)
-print("Start of data:")
-print(STARTDATA)
-print("Start of training set:")
-print(STARTMODEL)
-print("Start of test set:")
-print(STARTTEST)
-print("Horizon:")
-print(H)
-print("N_TEST:")
-print(N_TEST)
-print("Model vector:")
-print(MODEL_VECTOR) 
 sink()
 
 # Read and prepare -----------------------------------------------------------
@@ -51,41 +39,20 @@ extra_target_series <- timeseries_list$extra_target_series
 regressors <- timeseries_list$regressors
 
 # Test models -----------------------------------------------------------------
+# Generate tims object
+tims_obj <- tims(MODEL_VECTOR, STARTMODEL, STARTTEST, H,
+		 num_tests = N_TEST, aggregate_fun = aggr_fun)
+
 # Perform the rolling horizon test for each of the models in MODEL_VECTOR.
-model_loop <- rol_hor_model_loop(target_series, MODEL_VECTOR, STARTTEST, 
-                                 N_TEST, H, FREQ, regressors = regressors)
+tims_obj <- rol_hor_model_loop(target_series, tims_obj, regressors = regressors)
 
 # Metrics --------------------------------------------------------------------
-metrics <- model_loop$metrics
-if (check_aggr()) {
-  metrics_aggr <- model_loop$metrics_aggr
-}
 # Sort the data frames with the metrics based on the RMSE value.
-metrics_sort <- metrics %>% dplyr::arrange(RMSE)
-if (check_aggr()) {
-  metrics_aggr_sort <- metrics_aggr %>% dplyr::arrange(RMSE)
-}
+tims_obj <- sort_metrics(tims_obj, "RMSE")
 
 # Write the sorted metrics to the log file and the csv file.
 # Schrijf de data frames met metrieken weg naar het log bestand
-sink(LOGFILE, append = TRUE)
-print("Metrics:")
-print(metrics_sort)
-if (check_aggr()) {
-  print("Metrics aggregated:")
-  print(metrics_aggr_sort)
-}
-print("Error models:")
-print(model_loop$error_models)
-sink()
+logging(tims_obj, LOGFILE)
 
-csv_filename <- substr(LOGFILE, start = 1, stop = nchar(LOGFILE) - 4) %>%
-  paste0(".csv")
-csv_filename_aggr <- substr(LOGFILE, start = 1, stop = nchar(LOGFILE) - 4) %>%
-   paste0("_aggr.csv")
-
-write.csv(metrics, file = csv_filename, row.names = FALSE)
-if (check_aggr()) {
-  write.csv(metrics_aggr, file = csv_filename_aggr, row.names = FALSE)
-}
+export(tims_obj, LOGFILE)
 

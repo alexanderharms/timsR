@@ -40,7 +40,7 @@ source("./models/models-arima.R")
 # A aggregation function can be defined to allow prediction in a different
 # pattern than the training time series. The training time series can for
 # example be in months, but only the last year is of interest.
-# aggr_fun <- function(predictions) {
-#     pred_year <- sum(tail(predictions, 12))
-#     return(pred_year)
-# }
+aggr_fun <- function(predictions) {
+    pred_year <- sum(tail(predictions, 12))
+    return(pred_year)
+}

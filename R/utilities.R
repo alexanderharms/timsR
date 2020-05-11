@@ -1,20 +1,3 @@
-# # Inlezen data   --------------------------------------------------------------
-# #' Read data CSV
-# #' 
-# #' Leest tijdreeksen in van CSV; geeft een dataframe terug met als kolommen
-# #' de doelvariabele, de hulpvariabelen en eventueel kolommen met een
-# #' tijdsindicatie.
-# inlezen_data_csv <- function(DATAPAD, DATABESTAND, csv_sep = ';') {
-#   if (csv_sep == ',') {
-#     input_data <- read.csv(paste(DATAPAD, DATABESTAND, sep = ""),
-#                            stringsAsFactors = FALSE)
-#   } else {
-#     input_data <- read.csv2(paste(DATAPAD, DATABESTAND, sep = ""),
-#                             stringsAsFactors = FALSE)
-#   }
-#   return(input_data)
-# }
-
 #' Check aggregation function
 #'
 #' Checks existence of the aggregation function.
@@ -34,6 +17,9 @@ prepare_timeseries <- function(data, STARTDATA, STARTMODEL, FREQ,
                               REGCOLUMNS = NULL,
                               plot_timeseries = FALSE) {
   # Trims the time series to STARTMODEL.
+  #time_vec <- STARTDATA
+  #timeseries <- xts(data, order.by=time_vec) %>%
+
   timeseries <- ts(data, start = STARTDATA, frequency = FREQ,
                   names = names(data)) %>%
     window(start = STARTMODEL)
