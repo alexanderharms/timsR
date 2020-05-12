@@ -1,3 +1,14 @@
+generate_time_vector <- function(startdate, stepsize, vec_length){
+  steps_vec <- seq(0, vec_length - 1, length.out = vec_length)
+  if (stepsize == "quarters"){
+      stepsize <- "months"
+      steps_vec <- steps_vec * 3
+  }
+  time_vec <- sapply(steps_vec, function(step, start, unit) {
+                       as.character(start + lubridate::period(step, units=unit))
+                       }, start=startdate, unit=stepsize)
+  return(time_vec)
+}
 # Prepare time series  -------------------------------------------------------
 
 #' Prepare time series
@@ -11,13 +22,12 @@ prepare_timeseries <- function(data, STARTDATA, STARTMODEL, FREQ,
                                plot_timeseries = FALSE) {
   # Define a vector of dates from STARTDATA, with length length(data) and 
   # stepsize FREQ.
-  #time_vec <- STARTDATA
-  #timeseries <- xts(data, order.by=time_vec) %>%
-  # Trims the time series to STARTMODEL.
+  startdata <- lubridate::ymd_hms(STARTDATA)
+  startmodel <- lubridate::ymd_hms(STARTMODEL)
+  time_vec <- generate_time_vector(startdata, FREQ, nrow(data))
 
-  timeseries <- ts(data, start = STARTDATA, frequency = FREQ,
-                  names = names(data)) %>%
-    window(start = STARTMODEL)
+  timeseries <- xts(data, order.by=as.Date(time_vec), stepsize=FREQ) %>%
+      window(start = startmodel)
   
   if (is.null(TARGET_VAR)) {
     target_series <- NULL

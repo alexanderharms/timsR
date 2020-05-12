@@ -1,7 +1,8 @@
 library(forecast)
 # Alle ARIMA modellen --------------------------------------------------------
 train_arima <- function(target_series, regressors = NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
+  # x <- na.trim.ts(target_series)
   
   if (is.null(regressors)) {
     # modelarima <- stats::arima(x, order = c(1L, 1L, 1L))
@@ -47,7 +48,7 @@ pred_arima <- function(model, h) {
 
 # Arima model 1: non seasonal auto arima
 train_arima1 <- function(target_series, regressors = NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)) {
     modelarima1 <- auto.arima(x, seasonal = FALSE, allowdrift = TRUE) 
   } else {
@@ -78,7 +79,7 @@ pred_arima1 <- function(model, h, regressors=NULL) {
 
 # Arima model 2: seasonal auto arima
 train_arima2 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima2 <- auto.arima(x, seasonal=TRUE, allowdrift=TRUE)
   } else {
@@ -109,7 +110,7 @@ pred_arima2 <- function(model, h, regressors=NULL) {
 
 # Arima model 3: seasonal model handmatig gespecificeerd
 train_arima3 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   if (is.null(regressors)){
     modelarima3 <- Arima(x, order = c(2, 1, 2),
@@ -151,7 +152,7 @@ pred_arima3 <- function(model, h, regressors = NULL) {
 # Model 5: handmatig gespecificeerd model met Arima() i.p.v. arima() om 
 # verschil te bekijken
 train_arima5 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima5 <- Arima(x, order = c(2, 1, 2),
                          seasonal = list(order = c(2, 1, 0), period = 12),
@@ -189,7 +190,7 @@ pred_arima5 <- function(model, h, regressors=NULL) {
 
 # Model 6: non-seasonal, handmatig gespecificeerd 
 train_arima6 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima6 <- Arima(x, order = c(4, 0, 1),
                          xreg = NULL, 
@@ -225,7 +226,7 @@ pred_arima6 <- function(model, h, regressors=NULL) {
 
 # Model 7: seasonal model, handmatig gespecificeerd 
 train_arima7 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima7 <- Arima(x, order = c(3, 0, 0),
                          seasonal = list(order = c(2, 1, 0), period = 12),
@@ -263,7 +264,7 @@ pred_arima7 <- function(model, h, regressors=NULL) {
 
 # Seasonal model zonder drift, handmatig gespecificeerd 
 train_arima8 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima8 <- Arima(x, order = c(1, 1, 3),
                          seasonal = list(order = c(0, 1, 0), period = 12),
@@ -301,7 +302,7 @@ pred_arima8 <- function(model, h, regressors=NULL) {
 
 # Model 9: seasonal model zonder drift, handmatig gespecificeerd 
 train_arima9 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima9<- Arima(x, order = c(2, 1, 2),
                         seasonal = list(order = c(0, 1, 0), period = 12),
@@ -340,7 +341,7 @@ pred_arima9 <- function(model, h, regressors=NULL) {
 
 # Model 10: seasonal model zonder drift, handmatig gespecificeerd
 train_arima10 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima10 <- Arima(x, order = c(2, 1, 2),
                           seasonal = list(order = c(2, 1, 1), period = 12),
@@ -379,7 +380,7 @@ pred_arima10 <- function(model, h, regressors=NULL) {
 
 # Model 11: seasonal model zonder drift, handmatig gespecificeerd 
 train_arima11 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima11 <- Arima(x, order = c(2, 1, 1),
                           seasonal = list(order = c(2, 1, 1), period = 12),
@@ -418,7 +419,7 @@ pred_arima11 <- function(model, h, regressors=NULL) {
 
 # Model 12: seasonal model zonder drift, handmatig gespecificeerd 
 train_arima12 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   if (is.null(regressors)){
     modelarima12 <- Arima(x, order = c(2, 1, 1),
@@ -458,7 +459,7 @@ pred_arima12 <- function(model, h, regressors=NULL) {
 
 # Model 13: Seasonal model met drift, handmatig gespecificeerd
 train_arima13 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima13 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
@@ -496,7 +497,7 @@ pred_arima13 <- function(model, h, regressors=NULL) {
 
 # Model 14: seasonal model met drift, handmatig gespecificeerd
 train_arima14 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima14 <- Arima(x, order = c(2, 0, 2),
                           seasonal = list(order = c(1, 1, 2), period = 12),
@@ -536,7 +537,7 @@ pred_arima14 <- function(model, h, regressors=NULL) {
 
 # Model 15: seasonal model met drift, handmatig gespecificeerd
 train_arima15 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima15 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(1, 1, 2), period = 12),
@@ -575,7 +576,7 @@ pred_arima15 <- function(model, h, regressors=NULL) {
 
 # Model 16: seasonal model met drift, handmatig gespecificeerd
 train_arima16 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima16 <- Arima(x, order = c(1, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
@@ -614,7 +615,7 @@ pred_arima16 <- function(model, h, regressors=NULL) {
 
 # Model 17: seasonal model met drift, handmatig gespecificeerd
 train_arima17 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima17 <- Arima(x, order = c(2, 0, 1),
                           seasonal = list(order = c(0, 1, 2), period = 12),
@@ -653,7 +654,7 @@ pred_arima17 <- function(model, h, regressors=NULL) {
 }
 
 train_arima18 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima18 <- Arima(x, order = c(1, 1, 1),
                           seasonal = list(order = c(0, 1, 1), period = 12),
@@ -691,7 +692,7 @@ pred_arima18 <- function(model, h, regressors=NULL) {
 
 # 
 train_arima19 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima19 <- Arima(x, order = c(2, 0, 1),
                           seasonal = list(order = c(0, 1, 1), period = 12),
@@ -729,7 +730,7 @@ pred_arima19 <- function(model, h, regressors=NULL) {
 }
 
 train_arima20 <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   if (is.null(regressors)){
     modelarima20 <- Arima(x, order = c(4, 1, 3),
                           xreg = NULL, 

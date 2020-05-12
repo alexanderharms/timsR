@@ -1,6 +1,6 @@
 # ARIMA -----------------------------------------------------------------------
 train_arima <- function(target_series, regressors=NULL){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   if (is.null(regressor)) {
     # modelarima <- stats::arima(x, order = c(1L, 1L, 1L))
@@ -47,7 +47,7 @@ pred_arima <- function(model, h) {
 
 # Holt - Winters --------------------------------------------------------------
 train_holtwinters <- function(target_series) {
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   model_hw <- HoltWinters(x, alpha = NULL, beta = NULL, gamma = NULL,
                           seasonal = c("additive", "multiplicative"),
@@ -76,7 +76,7 @@ pred_holtwinters <- function(model, h) {
 
 # Naiëf model -----------------------------------------------------------
 train_naief <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   return(x)
   
 }
@@ -94,7 +94,7 @@ pred_naief <- function(x, h) {
 # Seizoens naief model (snaief) -----------------------------------------
 
 train_snaief <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   return(x)
 }
 
@@ -110,7 +110,7 @@ pred_snaief <- function(x, h) {
 
 # Exponentional Smoothing -------------------------------------------------
 train_exp_smooth <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   model_exp_smooth <- ets(x, model="ZZZ", damped=NULL, 
                     alpha=NULL, beta=NULL, gamma=NULL, phi=NULL, 

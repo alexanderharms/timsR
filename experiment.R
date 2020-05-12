@@ -7,6 +7,8 @@ source("./settings/settings.R")
 library(dplyr)
 library(zoo) 
 library(magrittr)
+library(lubridate)
+library(xts)
 
 source("./R/utilities.R")
 source("./R/tims.R")
@@ -30,13 +32,9 @@ sink()
 # Read and prepare -----------------------------------------------------------
 # Read the dataset and convert the dataset into a list with the target time
 # series (singular or plural) and the regressors.
-timeseries_list <- read.csv(DATAFILE, sep = ",", stringsAsFactors = FALSE) %>%
-    prepare_timeseries(STARTDATA, STARTMODEL, FREQ, TARGET_VAR,
+timeseries <- read.csv(DATAFILE, sep = ",", stringsAsFactors = FALSE) %>% 
+    prepare_timeseries(STARTDATA, STARTMODEL, FREQ, TARGET_VAR, 
                        REGCOLUMNS = REGCOLUMNS)
-
-target_series <- timeseries_list$target_series
-extra_target_series <- timeseries_list$extra_target_series
-regressors <- timeseries_list$regressors
 
 # Test models -----------------------------------------------------------------
 # Generate tims object
@@ -44,7 +42,7 @@ tims_obj <- tims(MODEL_VECTOR, STARTMODEL, STARTTEST, H,
 		 num_tests = N_TEST, aggregate_fun = aggr_fun)
 
 # Perform the rolling horizon test for each of the models in MODEL_VECTOR.
-tims_obj <- rol_hor_model_loop(target_series, tims_obj, regressors = regressors)
+tims_obj <- rol_hor_model_loop(timeseries, tims_obj)
 
 # Metrics --------------------------------------------------------------------
 # Sort the data frames with the metrics based on the RMSE value.

@@ -8,22 +8,27 @@ DATAFILE <- "./data/seatbelts.csv"
 LOGFILE <- "./logs/log.txt"
 
 # Frequency of the timeseries. For monthly data, FREQ <- 12.
-FREQ <- 12
+# FREQ <- 12
+FREQ <- "months"
 
 # Column in DATAFILE for the target time series.
 TARGET_VAR <- "drivers" 
 # Column(s) in DATAFILE that indicate the regressors.
 # Enter NULL to not use regressors.
 REGCOLUMNS <- c("kms")
+# REGCOLUMNS <- NULL
 
 # Starting date of the time series.
-STARTDATA <- c(1969, 1)
+# STARTDATA <- c(1969, 1)
+STARTDATA <- "1969-01-01 00:00:00"
 
 # The starting date of the training set.
-STARTMODEL <- c(1969, 1) 
+STARTMODEL <- "1970-01-01 00:00:00"
+# STARTMODEL <- c(1969, 1) 
 
 # STARTTEST is the start point of the first rolling horizon test.
-STARTTEST <- c(1981, 1)
+STARTTEST <- "1981-01-01 00:00:00"
+# STARTTEST <- c(1981, 1)
 
 H <- 12 # Prediction horizon
 N_TEST <- 24 # Number of rolling horizons
@@ -40,7 +45,7 @@ source("./models/models-arima.R")
 # A aggregation function can be defined to allow prediction in a different
 # pattern than the training time series. The training time series can for
 # example be in months, but only the last year is of interest.
-aggr_fun <- function(predictions) {
-    pred_year <- sum(tail(predictions, 12))
-    return(pred_year)
-}
+# aggr_fun <- function(predictions) {
+#     pred_year <- sum(tail(predictions, 12))
+#     return(pred_year)
+# }

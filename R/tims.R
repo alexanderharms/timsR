@@ -55,6 +55,8 @@ tims <- function(model_names, startmodel, starttest, horizon,
 		 num_tests = NULL, horizon_spacing = 1, 
 		 aggregate_fun = NULL) {
 	
+  startmodel <- as.Date(startmodel)
+  starttest  <- as.Date(starttest)
   return(new_tims(model_names, startmodel, starttest, horizon,
 		  num_tests, horizon_spacing, aggregate_fun))
 }

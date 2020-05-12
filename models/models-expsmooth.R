@@ -2,7 +2,7 @@
 
 # Algemene Exponentional Smoothing functie
 train_exp_smooth <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   modelexp_smooth <- ets(x, model="ZZZ", damped=NULL, 
                          alpha=NULL, beta=NULL, gamma=NULL, phi=NULL, 
@@ -30,7 +30,7 @@ pred_exp_smooth <- function(model, h) {
 
 # Model 0: automatisch exponential smoothing model
 train_exp_smooth1 <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   modelexp_smooth1 <- ets(x)
   print(summary(modelexp_smooth1))
@@ -49,7 +49,7 @@ pred_exp_smooth1 <- function(model, h) {
 
 # Model 1: Holt - Winters - additief - met HoltWinters() functie 
 train_holtwinters <- function(target_series) {
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   model_hw <- HoltWinters(x, alpha = NULL, beta = NULL, gamma = NULL,
                           seasonal = "additive",
@@ -72,7 +72,7 @@ pred_holtwinters <- function(model, h) {
 
 # Model 2 Holt - Winters - multiplicatief - met HoltWinters() functie
 train_holtwinters2 <- function(target_series) {
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   model_hw2 <- HoltWinters(x, alpha = NULL, beta = NULL, gamma = NULL,
                           seasonal = c("mult"),
@@ -101,7 +101,7 @@ pred_holtwinters2 <- function(model, h) {
 
 # Model 3: Holt - Winters - additief - met ets() functie
 train_holtwinters3 <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   model_hw3 <- ets(x, model="AAA")
   print(summary(model_hw3))
@@ -119,7 +119,7 @@ pred_holtwinters3 <- function(model, h) {
 
 # Model 4: Holt - Winters - multiplicatief - met ets() functie
 train_holtwinters4 <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   model_hw4 <- ets(x, model="MAM")
   print(summary(model_hw4))
@@ -138,7 +138,7 @@ pred_holtwinters4 <- function(model, h) {
 # Model 5: Simple Exponentional Smoothing - Alleen het niveau van de reeks 
 # wordt geschat
 train_s_exp_smooth <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   models_exp_smooth <- ets(x, model="ANN")
   print(summary(models_exp_smooth))
@@ -156,7 +156,7 @@ pred_s_exp_smooth <- function(model, h) {
  
 # Model 6: Holt - Niveau en trend worden geschat
 train_holt <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   modelholt <- ets(x, model="AAN")
   print(summary(modelholt))
@@ -174,7 +174,7 @@ pred_holt <- function(model, h) {
 
 # Model 7: Holt Winters Additief zonder trend
 train_holtwinters5 <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   modelholtwinters5 <- ets(x, model="ANA")
   print(summary(modelholtwinters5))
@@ -192,7 +192,7 @@ pred_holtwinters5 <- function(model, h) {
 
 # Model 8: Holt Winters multiplicatief zonder trend
 train_holtwinters6 <- function(target_series){
-  x <- na.trim.ts(target_series)
+  x <- target_series
   
   modelholtwinters6 <- ets(x, model="MNM")
   print(summary(modelholtwinters6))
