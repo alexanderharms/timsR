@@ -1,10 +1,3 @@
-#' Check aggregation function
-#'
-#' Checks existence of the aggregation function.
-check_aggr <- function() {
-    return(exists("aggr_fun"))
-}
-
 # Prepare time series  -------------------------------------------------------
 
 #' Prepare time series
@@ -13,12 +6,14 @@ check_aggr <- function() {
 #' regressors; returns a list with the time series for the main target variable,
 #' any extra target variables and the regressors.
 prepare_timeseries <- function(data, STARTDATA, STARTMODEL, FREQ, 
-                              TARGET_VAR = NULL,
-                              REGCOLUMNS = NULL,
-                              plot_timeseries = FALSE) {
-  # Trims the time series to STARTMODEL.
+                               TARGET_VAR = NULL,
+                               REGCOLUMNS = NULL,
+                               plot_timeseries = FALSE) {
+  # Define a vector of dates from STARTDATA, with length length(data) and 
+  # stepsize FREQ.
   #time_vec <- STARTDATA
   #timeseries <- xts(data, order.by=time_vec) %>%
+  # Trims the time series to STARTMODEL.
 
   timeseries <- ts(data, start = STARTDATA, frequency = FREQ,
                   names = names(data)) %>%
