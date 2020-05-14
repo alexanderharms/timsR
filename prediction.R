@@ -5,17 +5,21 @@
 source("./settings/settings.R")
 
 library(dplyr)
+library(ggplot2)
 library(zoo) 
 library(magrittr)
+library(lubridate)
+library(xts)
 
 source("./R/utilities.R")
+source("./R/tims.R")
 source("./R/rol_hor_functions.R")
 
 if (!exists("REGCOLUMNS")) REGCOLUMNS <- NULL
-
 if (!exists("STARTMODEL")) STARTMODEL <- STARTDATA
-
 if (!exists("LOGFILE")) LOGFILE <- "./logs/log.txt"
+if (!exists("aggr_fun")) aggr_fun <- NULL
+if (!exists("REGCOLUMNS")) REGCOLUMNS <- NULL
 
 # Schrijf de settings weg naar een logbestand 
 sink(LOGFILE) 
@@ -25,80 +29,31 @@ print("Target:")
 print(TARGET_VAR)
 print("Regressors:")
 print(REGCOLUMNS)
-print("Start of data:")
+print("Start data:")
 print(STARTDATA)
-print("Start of training set:")
-print(STARTMODEL)
-print("Start of test set:")
-print(STARTTEST)
-print("Horizon:")
-print(H)
-print("N_TEST:")
-print(N_TEST)
-print("Model vector:")
-print(MODEL_VECTOR) 
 sink()
 
 # Read and prepare -----------------------------------------------------------
 # Read the dataset and convert the dataset into a list with the target time
 # series (singular or plural) and the regressors.
-timeseries_list <- read.csv(DATAFILE, sep = ",", stringsAsFactors = FALSE) %>%
-    prepare_timeseries(STARTDATA, STARTMODEL, FREQ, TARGET_VAR,
+timeseries <- read.csv(DATAFILE, sep = ",", stringsAsFactors = FALSE) %>% 
+    prepare_timeseries(STARTDATA, STARTMODEL, STEPSIZE, TARGET_VAR, 
                        REGCOLUMNS = REGCOLUMNS)
 
-target_series <- timeseries_list$target_series
-extra_target_series <- timeseries_list$extra_target_series
-regressors <- timeseries_list$regressors
+# Generate tims object
+pred_model_idx <- 1
+tims_obj <- tims(MODEL_VECTOR[pred_model_idx], STARTMODEL, STARTTEST, H,
+		 num_tests = 1, aggregate_fun = aggr_fun)
 
-# Take the first name that is specified in MODEL_VECTOR
-model_name <- MODEL_VECTOR[1]
+hor_dates <- calculate_horizon_dates(tims_obj, timeseries$stepsize, hor_idx=0)
+timeseries <- calculate_train_series(timeseries, tims_obj, hor_dates)
 
-# Select the train and predict function
-train_fun <- paste0("train_", model_name) %>% get()
-pred_fun  <- paste0("pred_", model_name) %>% get()
+tims_obj <- train_model(tims_obj, timeseries, model_idx=pred_model_idx, hor_idx=0)
 
-enddate <- STARTTEST[1] + (STARTTEST[2] - 1)/tsp(target_series)[3]
-target_series <- target_series %>% 
-  window(end = enddate) %>%
-  na.trim()
-
-if (is.null(regressors)) {
-  trained_model <- train_fun(target_series)
-  prediction_df <- trained_model %>% pred_fun(H)
-} else {
-  reg_train <- window(regressors, end = tsp(target_series)[2])
-  
-  trained_model <- train_fun(target_series, reg_train)
-  
-  reg_pred_start_date <- tsp(target_series)[2] + 1/tsp(target_series)[3]
-  reg_pred_end_date <- tsp(target_series)[2] + H/tsp(target_series)[3]
-
-  reg_pred <- window(regressors,
-                     start = reg_pred_start_date,
-                     end = reg_pred_end_date)
-  prediction_df <- trained_model %>% pred_fun(h=H, regressors=reg_pred)
-}
+timeseries <- calculate_test_series(timeseries, tims_obj, hor_dates)
+prediction_df <- predict_model(tims_obj, timeseries, model_idx=pred_model_idx, hor_idx=0)
 
 prediction <- prediction_df$prediction
 
 # Plot the prediction in red
-ts.plot(target_series, prediction, gpars=list(col = c("black", "red")))
-
-# Make a data frame with the year, period and the corresponding prediction
-date_vector <- seq(end(target_series)[1] + (end(target_series)[2])/FREQ, 
-                   end(target_series)[1] + (end(target_series)[2] + H - 1)/FREQ, 
-                   length.out = H)
-
-year_vec <- floor(date_vector) 
-period_vec <- round((date_vector - floor(date_vector)) * FREQ) + 1
-prediction_df <- data.frame("Year" = year_vec,
-                            "Period" = period_vec,
-                            "Prediction" = as.numeric(prediction))
-sink(LOGFILE, append = TRUE)
-print(prediction_df)
-sink()
-
-# Opslaan van het dataframe met de gemaakte voorspelling
-predict_csv <- substr(LOGFILE, start = 1, stop = nchar(LOGFILE) - 4) %>%
-  paste0("_prediction.csv")
-write.csv(prediction_df, file = predict_csv, row.names = FALSE)
+plot(tims_obj, timeseries, pred_model_idx, hor_idx=0)

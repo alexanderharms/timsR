@@ -7,9 +7,9 @@ DATAFILE <- "./data/seatbelts.csv"
 # "./logs/log.csv".
 LOGFILE <- "./logs/log.txt"
 
-# Frequency of the timeseries. For monthly data, FREQ <- 12.
-# FREQ <- 12
-FREQ <- "months"
+# Stepsize between the measurement values
+# Can be "years", "quarters", "months", "days", "hours", "minutes" or "seconds"
+STEPSIZE <- "months"
 
 # Column in DATAFILE for the target time series.
 TARGET_VAR <- "drivers" 
@@ -19,18 +19,16 @@ REGCOLUMNS <- c("kms")
 # REGCOLUMNS <- NULL
 
 # Starting date of the time series.
-# STARTDATA <- c(1969, 1)
 STARTDATA <- "1969-01-01 00:00:00"
 
 # The starting date of the training set.
 STARTMODEL <- "1970-01-01 00:00:00"
-# STARTMODEL <- c(1969, 1) 
 
 # STARTTEST is the start point of the first rolling horizon test.
 STARTTEST <- "1981-01-01 00:00:00"
-# STARTTEST <- c(1981, 1)
 
 H <- 12 # Prediction horizon
+HOR_SPACING <- c(2, "months") # Default is c(1, STEPSIZE)
 N_TEST <- 24 # Number of rolling horizons
 
 # Indicate the models that should be tested.

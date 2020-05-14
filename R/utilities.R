@@ -18,8 +18,7 @@ generate_time_vector <- function(startdate, stepsize, vec_length){
 #' any extra target variables and the regressors.
 prepare_timeseries <- function(data, STARTDATA, STARTMODEL, FREQ, 
                                TARGET_VAR = NULL,
-                               REGCOLUMNS = NULL,
-                               plot_timeseries = FALSE) {
+                               REGCOLUMNS = NULL) {
   # Define a vector of dates from STARTDATA, with length length(data) and 
   # stepsize FREQ.
   startdata <- lubridate::ymd_hms(STARTDATA)
@@ -49,17 +48,10 @@ prepare_timeseries <- function(data, STARTDATA, STARTMODEL, FREQ,
     regressors <- timeseries[, REGCOLUMNS]
   }
   
-  if (plot_timeseries) {
-    ts.plot(target_series, gpars = list(main = "Target series"))
-    
-    if (!is.null(regressors)) {
-      ts.plot(regressors, gpars = list(main = "Regressors"))
-    }
-  }
-  
   return(list("target_series" = target_series,
               "regressors" = regressors,
-              "extra_target_series" = extra_target_series))
+              "extra_target_series" = extra_target_series,
+              "stepsize" = FREQ))
 }
 
 plot_rol_hor_list <- function(rol_hor_list, plot_title, freq,

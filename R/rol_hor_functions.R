@@ -12,7 +12,7 @@ rol_hor_model_loop <- function(timeseries, tims_obj) {
      # contained.
      tims_obj <- rolling_horizon(timeseries, model_idx, tims_obj)
      tims_obj
-    },
+   },
    # If the rolling horizon gives an error, add the model name to the vector
    # of error_models.
    error = function(cond) {
@@ -24,7 +24,6 @@ rol_hor_model_loop <- function(timeseries, tims_obj) {
   
   return(tims_obj)
 }
-
 
 add_metrics <- function(model_name, obj_metrics, metrics) {
     obj_metrics <- rbind(obj_metrics, 
@@ -38,6 +37,91 @@ add_metrics <- function(model_name, obj_metrics, metrics) {
              MAPE = MAPE %>% as.character() %>% as.numeric())
 
   return(obj_metrics)
+}
+
+calculate_horizon_dates <- function(tims_obj, stepsize, hor_idx) {
+    if (is.null(tims_obj$hor_spacing)) {
+      hor_spacing <- 1
+      hor_units <- stepsize
+    } else {
+      hor_spacing <- as.numeric(tims_obj$hor_spacing[1])
+      hor_units   <- tims_obj$hor_spacing[2]
+    }
+    end_train <- tims_obj$starttest - 
+        lubridate::period(1, units=stepsize) +
+        lubridate::period(hor_idx * hor_spacing, 
+                          units=hor_units)
+    start_hor <- tims_obj$starttest + 
+        lubridate::period(hor_idx * hor_spacing, 
+                          units=hor_units)
+    end_hor <- tims_obj$starttest + 
+        lubridate::period(tims_obj$horizon, units=stepsize) +
+        lubridate::period(hor_idx * hor_spacing, 
+                          units=hor_units)
+    hor_dates <- list("end_train" = end_train,
+                      "start_hor" = start_hor,
+                      "end_hor"   = end_hor)
+    
+    return(hor_dates)
+}
+
+calculate_train_series <- function(timeseries, tims_obj, hor_dates) {
+    target_train <- timeseries$target_series %>% 
+        window(end = hor_dates$end_train)
+
+    if (!is.null(timeseries$regressors)) { 
+        reg_train <- timeseries$regressors %>% 
+            window(end = hor_dates$end_train)
+    }
+
+    timeseries$target_train <- target_train
+    timeseries$reg_train <- reg_train
+    return(timeseries)
+}
+
+calculate_test_series <- function(timeseries, tims_obj, hor_dates) {
+    actual <- timeseries$target_series %>% 
+        window(start = hor_dates$start_hor, end = hor_dates$end_hor)
+
+    if (!is.null(timeseries$regressors)) { 
+        reg_pred <- timeseries$regressors %>%
+            window(start = hor_dates$start_hor, end = hor_dates$end_hor)
+    }
+
+    timeseries$actual   <- actual
+    timeseries$reg_pred <- reg_pred
+    return(timeseries)
+}
+
+train_model <- function(tims_obj, timeseries, model_idx, hor_idx) {
+    target_train <- timeseries$target_train
+    reg_train  <- timeseries$reg_train
+    # Train the model.
+    if (!is.null(timeseries$regressors)){
+    	tims_obj$trained_models[[model_idx]][[hor_idx+1]] <- 
+    		tims_obj$train_funcs[[model_idx]](target_train, 
+    						  regressors = reg_train)
+    } else {
+    	tims_obj$trained_models[[model_idx]][[hor_idx+1]] <- 
+    		tims_obj$train_funcs[[model_idx]](target_train)
+    }
+
+    return(tims_obj)
+}
+
+predict_model <- function(tims_obj, timeseries, model_idx, hor_idx){
+    reg_pred <- timeseries$reg_pred
+
+    if (!is.null(timeseries$regressors)){
+        prediction_df <- tims_obj$trained_models[[model_idx]][[hor_idx+1]] %>% 
+		tims_obj$pred_funcs[[model_idx]](tims_obj$horizon,
+						 regressors = reg_pred)
+    } else {
+        prediction_df <- tims_obj$trained_models[[model_idx]][[hor_idx+1]] %>% 
+		tims_obj$pred_funcs[[model_idx]](tims_obj$horizon)
+    }
+
+    return(prediction_df)
 }
 
 #' Rolling horizon
@@ -64,64 +148,26 @@ rolling_horizon <- function(timeseries, model_idx, tims_obj) {
   
   # plot_data <- list()
   for (i in 0:(tims_obj$num_tests - 1)) {
-    # tsp(series)[3] is the frequency of the series
-    enddate <- tims_obj$starttest + 
-        lubridate::period(tims_obj$horizon + i, units=timeseries$stepsize)
-    series_new <- timeseries$target_series %>% window(end = enddate)
-    actual <- series_new[(length(series_new) - (tims_obj$horizon - 1))
-			   :length(series_new)]
-    series_new <- series_new %>%
-        window(end = enddate - lubridate::period(tims_obj$horizon, 
-                                                 unit=timeseries$stepsize))
+    hor_dates <- calculate_horizon_dates(tims_obj, timeseries$stepsize, i)
+    timeseries <- calculate_train_series(timeseries, tims_obj, hor_dates)
 
-    if (!is.null(timeseries$regressors)) { 
-        reg_train <- timeseries$regressors %>%
-            window(end = (enddate - lubridate::period(tims_obj$horizon, 
-                                                      units=timeseries$stepsize)))
-        reg_pred <- timeseries$regressors %>% 
-            window(start = enddate - lubridate::period(tims_obj$horizon - 1,
-                                                       units=timeseries$stepsize), 
-                   end =  enddate)
-    }
+    tims_obj <- train_model(tims_obj, timeseries, model_idx, i)
+
+    timeseries <- calculate_test_series(timeseries, tims_obj, hor_dates)
+    prediction_df <- predict_model(tims_obj, timeseries, model_idx, i)
     
-    # Train the model.
-    if (!is.null(timeseries$regressors)){
-	tims_obj$trained_model[[model_idx]] <- 
-		tims_obj$train_funcs[[model_idx]](series_new, 
-						  regressors = reg_train)
-    } else {
-	tims_obj$trained_model[[model_idx]] <- 
-		tims_obj$train_funcs[[model_idx]](series_new)
-    }
-
-    # FUN_PRED returns a data frame with the prediction and the 95% confidence
-    # interval. 
-    if (!is.null(timeseries$regressors)){
-        return_df <- tims_obj$trained_model[[model_idx]] %>% 
-		tims_obj$pred_funcs[[model_idx]](tims_obj$horizon,
-						 regressors = reg_pred)
-    } else {
-        return_df <- tims_obj$trained_model[[model_idx]] %>% 
-		tims_obj$pred_funcs[[model_idx]](tims_obj$horizon)
-    }
-    prediction <- return_df$prediction
-    actual_pred <- cbind(actual, prediction)
+    prediction <- prediction_df$prediction
+    actual_pred <- cbind(timeseries$actual, prediction)
     colnames(actual_pred) <- c("actual", "prediction")
     nowcasts <- rbind(nowcasts, actual_pred)
 
     if (!is.null(tims_obj$aggregate_fun)) {
-      actual_aggr <- tims_obj$aggregate_fun(actual)
+      actual_aggr <- tims_obj$aggregate_fun(timeseries$actual)
       prediction_aggr <- tims_obj$aggregate_fun(prediction)
       actual_pred_aggr <- cbind(actual_aggr, prediction_aggr)
       colnames(actual_pred_aggr) <- c("actual", "prediction")
       nowcasts_aggr <- rbind(nowcasts_aggr, actual_pred_aggr)
     } 
-    
-    # Accompany plot_data with time information to later plot it as a time
-    # series.
-    # date_vector <- enddate +
-    #   seq(-(h - 1), 0, length.out = h)/tsp(series)[3]
-    # plot_data[[i+1]] <- cbind(actual, return_df, date_vector)
   }
   
   # Calculate the metrics based on the actual value and the prediction

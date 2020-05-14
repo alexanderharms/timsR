@@ -1,7 +1,7 @@
-new_tims <- function(model_names = character(), startmodel = NULL, 
-		     starttest = NULL, horizon = integer(), 
+new_tims <- function(model_names = character(), startmodel, 
+		     starttest, horizon = integer(), 
 		     num_tests = integer(), 
-		     horizon_spacing = NULL, aggregate_fun = NULL){
+		     horizon_spacing, aggregate_fun = NULL){
   
   # Define quantities related to the time series
   # Startmodel, starttest, horizon.
@@ -40,9 +40,10 @@ new_tims <- function(model_names = character(), startmodel = NULL,
 		    "starttest" = starttest, 
 		    "train_funcs" = train_funcs,
 		    "pred_funcs" = pred_funcs,
+                    "trained_models" = list(list()),
 		    "horizon" = horizon,
 		    "num_tests" = num_tests,
-		    "horizon_spacing" = horizon_spacing,
+		    "hor_spacing" = horizon_spacing,
 		    "aggregate_fun" = aggregate_fun,
 		    "metrics" = metrics,
 		    "metrics_aggr" = metrics_aggr,
@@ -52,36 +53,46 @@ new_tims <- function(model_names = character(), startmodel = NULL,
 }
 
 tims <- function(model_names, startmodel, starttest, horizon,
-		 num_tests = NULL, horizon_spacing = 1, 
-		 aggregate_fun = NULL) {
+	 num_tests = NULL, horizon_spacing = NULL, 
+	 aggregate_fun = NULL) {
 	
   startmodel <- as.Date(startmodel)
   starttest  <- as.Date(starttest)
   return(new_tims(model_names, startmodel, starttest, horizon,
-		  num_tests, horizon_spacing, aggregate_fun))
-}
-
-# Train model
-train <- function(x) {
-  UseMethod("train")
-}
-
-train.tims <- function(x) {
-}
-
-print.tims <- function(obj) {
-  # print("Hello, world!")
+            		  num_tests, horizon_spacing, aggregate_fun))
 }
 
 
 # Plot a test with a certain index
-# Default the last index
-plot.tims <- function() {
+plot.tims <- function(tims_obj, timeseries, model_idx, hor_idx) {
+    trained_model <- tims_obj$trained_models[[model_idx]][[hor_idx+1]]
+    pred_fun <- tims_obj$pred_funcs[[model_idx]]
+    
+    hor_dates <- calculate_horizon_dates(tims_obj, timeseries$stepsize, hor_idx)
+    timeseries <- calculate_test_series(timeseries, tims_obj, hor_dates)
+    
+    prediction_df <- predict_model(tims_obj, timeseries, model_idx, hor_idx)
+    time_vec <- generate_time_vector(hor_dates$start_hor, timeseries$stepsize, 
+                                     nrow(prediction_df))
+    prediction_df <- prediction_df %>%
+      xts(order.by = as.Date(time_vec)) 
+      ggplot2::fortify()
+    target_series <- timeseries$target_series %>% ggplot2::fortify()
+    colnames(target_series) <- c("Index", "target")
+    
+    ggplot2::ggplot() +
+      ggplot2::geom_line(target_series, mapping=aes(x=Index, y=target)) +
+      ggplot2::geom_line(prediction_df, mapping=aes(x=Index, y=prediction),
+                         colour = "red") + 
+      ggplot2::geom_line(prediction_df, mapping=aes(x=Index, y=lower_conf),
+                         colour = "blue") + 
+      ggplot2::geom_line(prediction_df, mapping=aes(x=Index, y=upper_conf),
+                         colour = "blue") 
 }
 
 # Logs data and results
 logging <- function(obj, log_filename) {
-  UseMethod("sort_metrics")
+  UseMethod("logging")
 }
 
 logging.default <- function(obj, log_filename) {
@@ -90,8 +101,6 @@ logging.default <- function(obj, log_filename) {
 
 logging.tims <- function(obj, log_filename) {
   sink(log_filename, append = TRUE)
-  print("Start of data:")
-  print(obj$startdata)
   print("Start of training set:")
   print(obj$startmodel)
   print("Start of test set:")
@@ -112,7 +121,6 @@ logging.tims <- function(obj, log_filename) {
   print(obj$error_models)
   sink()
 }
-
 
 sort_metrics <- function(obj, ...) {
   UseMethod("sort_metrics")

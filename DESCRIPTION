@@ -13,5 +13,7 @@ LazyData: true
 Imports:
   magrittr,
   dplyr,
-  zoo
+  ggplot2,
+  zoo,
+  xts
 RoxygenNote: 6.1.1
