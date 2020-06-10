@@ -7,6 +7,8 @@
 #' any extra target variables and the regressors.
 prepare_timeseries <- function(tims_object) {
   # Trim timeseries to the start of modeling
+  print(tims_object$start_data)
+  print(tims_object$start_model)
   timeseries <- ts(tims_object$dataset, start = tims_object$start_data, 
                    frequency = tims_object$frequency, 
                    names = names(tims_object$dataset)) %>%
@@ -20,51 +22,44 @@ prepare_timeseries <- function(tims_object) {
   return(tims_object)
 }
 
+calculate_horizon_dates <- function(tims_object, hor_num) {
+  hor_num <- hor_num - 1
+  horizon_spacing <- 1
+  start_horizon <- tims_object$start_test[1] + 
+    (tims_object$start_test[2] - 1 + hor_num * horizon_spacing)/tims_object$frequency
+  end_horizon <- start_horizon + tims_object$horizon/tims_object$frequency
+  start_training <- tims_object$start_model
+  end_training <- start_horizon - 1/tims_object$frequency
+  
+  tims_object$start_training <- tims_object$start_model
+  tims_object$end_training <- end_training
+  tims_object$start_horizon <- start_horizon
+  tims_object$end_horizon <- end_horizon
+  
+  return(tims_object)
+}
 
+get_train_data <- function(tims_object, hor_num) {
+  tims_object <- calculate_horizon_dates(tims_object, hor_num)
+  
+  tims_object$target_train <- tims_object$target_series %>%
+    window(start=tims_object$start_training,
+           end=tims_object$end_training)
+  tims_object$reg_train <- tims_object$reg_series %>%
+    window(start=tims_object$start_training,
+           end=tims_object$end_training)
+  
+  return(tims_object)
+}
 
-# prepare_timeseries <- function(data, STARTDATA, STARTMODEL, FREQ, 
-#                                TARGET_VAR = NULL,
-#                                REGCOLUMNS = NULL,
-#                                plot_timeseries = FALSE) {
-#   # Define a vector of dates from STARTDATA, with length length(data) and 
-#   # stepsize FREQ.
-#   #time_vec <- STARTDATA
-#   #timeseries <- xts(data, order.by=time_vec) %>%
-#   # Trims the time series to STARTMODEL.
-# 
-#   timeseries <- ts(data, start = STARTDATA, frequency = FREQ,
-#                   names = names(data)) %>%
-#     window(start = STARTMODEL)
-#   
-#   if (is.null(TARGET_VAR)) {
-#     target_series <- NULL
-#     extra_target_series <- NULL
-#   } else {
-#     # The first item in the vector TARGET_VAR becomes the first target series,
-#     # the other items will be stored as extra_target_series.
-#     target_series <- timeseries[, TARGET_VAR[1]]
-#     if (length(TARGET_VAR) > 1) {
-#       extra_target_series <- timeseries[, TARGET_VAR[2:length(TARGET_VAR)]]
-#     } else {
-#       extra_target_series <- NULL
-#     }
-#   }
-#   
-#   if (is.null(REGCOLUMNS)) {
-#     regressors <- NULL
-#   } else {
-#     regressors <- timeseries[, REGCOLUMNS]
-#   }
-#   
-#   if (plot_timeseries) {
-#     ts.plot(target_series, gpars = list(main = "Target series"))
-#     
-#     if (!is.null(regressors)) {
-#       ts.plot(regressors, gpars = list(main = "Regressors"))
-#     }
-#   }
-#   
-#   return(list("target_series" = target_series,
-#               "regressors" = regressors,
-#               "extra_target_series" = extra_target_series))
-# }
+get_test_data <- function(tims_object, hor_num) {
+  tims_object <- calculate_horizon_dates(tims_object, hor_num)
+  
+  tims_object$target_test <- tims_object$target_series %>%
+    window(start=tims_object$start_horizon,
+           end=tims_object$end_horizon)
+  tims_object$reg_test <- tims_object$reg_series %>%
+    window(start=tims_object$start_horizon,
+           end=tims_object$end_horizon)
+  return(tims_object)
+}

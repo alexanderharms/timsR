@@ -31,83 +31,68 @@ load_data <- function(settings_list) {
   return(df)
 }
 
+sort_metrics <- function(tims_object, sort_tag) {
+  sort_tag <- rlang::enquo(sort_tag)
+  tims_object$metrics <- tims_object$metrics %>% dplyr::arrange(!! sort_tag)
+  # if (!is.null(obj$aggregate_fun)) {
+  #   obj$metrics_aggr <- obj$metrics_aggr %>% dplyr::arrange(!! sort_tag)
+  # }
+  return(tims_object)
+}
 
+log_experiment <- function(tims_object) {
+  log_filename <- tims_object$logfile
+  
+  sink(log_filename, append = TRUE)
+  print("Start of training set:")
+  print(tims_object$start_model)
+  print("Start of test set:")
+  print(tims_object$start_test)
+  print("Horizon:")
+  print(tims_object$horizon)
+  print("Number of tests:")
+  print(tims_object$num_tests)
+  print("Model vector:")
+  print(tims_object$model_names) 
+  print("Metrics:")
+  print(tims_object$metrics)
+  # if (!is.null(obj$aggregate_fun)) {
+  #   print("Metrics, aggregated:")
+  #   print(obj$metrics_aggr)
+  # }
+  print("Error models:")
+  print(tims_object$error_models)
+  sink()
+  return(tims_object)
+}
 
-#' # Prepare time series  -------------------------------------------------------
-#' 
-#' #' Prepare time series
-#' #'
-#' #' Reads in a data frame with columns for the target variable(s) and the
-#' #' regressors; returns a list with the time series for the main target variable,
-#' #' any extra target variables and the regressors.
-#' prepare_timeseries <- function(data, STARTDATA, STARTMODEL, FREQ, 
-#'                                TARGET_VAR = NULL,
-#'                                REGCOLUMNS = NULL,
-#'                                plot_timeseries = FALSE) {
-#'   # Define a vector of dates from STARTDATA, with length length(data) and 
-#'   # stepsize FREQ.
-#'   #time_vec <- STARTDATA
-#'   #timeseries <- xts(data, order.by=time_vec) %>%
-#'   # Trims the time series to STARTMODEL.
-#' 
-#'   timeseries <- ts(data, start = STARTDATA, frequency = FREQ,
-#'                   names = names(data)) %>%
-#'     window(start = STARTMODEL)
-#'   
-#'   if (is.null(TARGET_VAR)) {
-#'     target_series <- NULL
-#'     extra_target_series <- NULL
-#'   } else {
-#'     # The first item in the vector TARGET_VAR becomes the first target series,
-#'     # the other items will be stored as extra_target_series.
-#'     target_series <- timeseries[, TARGET_VAR[1]]
-#'     if (length(TARGET_VAR) > 1) {
-#'       extra_target_series <- timeseries[, TARGET_VAR[2:length(TARGET_VAR)]]
-#'     } else {
-#'       extra_target_series <- NULL
-#'     }
-#'   }
-#'   
-#'   if (is.null(REGCOLUMNS)) {
-#'     regressors <- NULL
-#'   } else {
-#'     regressors <- timeseries[, REGCOLUMNS]
-#'   }
-#'   
-#'   if (plot_timeseries) {
-#'     ts.plot(target_series, gpars = list(main = "Target series"))
-#'     
-#'     if (!is.null(regressors)) {
-#'       ts.plot(regressors, gpars = list(main = "Regressors"))
-#'     }
-#'   }
-#'   
-#'   return(list("target_series" = target_series,
-#'               "regressors" = regressors,
-#'               "extra_target_series" = extra_target_series))
-#' }
-#' 
-#' plot_rol_hor_list <- function(rol_hor_list, plot_title, freq,
-#'                               zoom = TRUE, target_series = NULL){
-#'   if (zoom == FALSE & is.null(target_series)) {
-#'     stop("With zoom = FALSE a target series needs to be defined.")
-#'   }
-#'   
-#'   for (item in rol_hor_list$plot_data) {
-#'     item_ts <- ts(item, start = item[, 'date_vector'][1],
-#'                   end = item[, 'date_vector'][nrow(item)],
-#'                   frequency = freq)
-#'     
-#'     if (zoom == FALSE) {
-#'       reeks <- target_series
-#'     } else {
-#'       reeks <- item_ts[, 'actual']
-#'     } 
-#'     
-#'     ts.plot(reeks, item_ts[, 'prediction'], 
-#'             item_ts[, 'lower_conf'], item_ts[, 'upper_conf'], 
-#'             gpars=list(main = plot_title,
-#'                        col = c('black', 'red', 'blue', 'blue')))
-#'   }
-#' }
-#' 
+export_results <- function(tims_object) {
+  log_filename <- tims_object$logfile
+  
+  print(tims_object$metrics)
+  csv_filename <- substr(log_filename, start = 1, 
+                         stop = nchar(log_filename) - 4) %>% paste0(".csv")
+  # csv_filename_aggr <- substr(log_filename, start = 1, 
+  #                             stop = nchar(log_filename) - 4) %>% paste0("_aggr.csv")
+  
+  write.csv(tims_object$metrics, file = csv_filename, row.names = FALSE)
+  # if (!is.null(obj$aggregate_fun)) {
+  #   write.csv(obj$metrics_aggr, file = csv_filename_aggr, row.names = FALSE)
+  # }
+  return(tims_object)
+}
+
+plot_experiment <- function(tims_object, model_index=1, hor_num=1) {
+  tims_object <- tims_object %>% 
+    get_test_data(hor_num) %>%
+    predict_model(model_index, hor_num)
+  plot_title <- paste0("Model: ", tims_object$model_names[model_index], 
+                       ", Horizon: ", hor_num)
+  
+  ts.plot(tims_object$target_test, 
+          tims_object$prediction[, 'prediction'],
+          tims_object$prediction[, 'lower_conf'],
+          tims_object$prediction[, 'upper_conf'],
+          gpars=list(main = plot_title,
+                     col= c('black', 'red', 'blue', 'blue')))
+}

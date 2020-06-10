@@ -1,6 +1,12 @@
+### A testing setup for time series analysis.
+# Author: Alexander Harms
+
 library(magrittr)
+library(dplyr)
+library(zoo) 
 
 source("./R/tims.R")
+source("./R/iterators.R")
 source("./R/timeseries.R")
 source("./R/utilities.R")
 
@@ -11,13 +17,11 @@ df <- load_data(settings_list)
 
 # Generate timsR object
 tims_object <- tims(settings_list, df) %>%
-  extract_time_series() %>%  # Extract time series
-  iterate_models_and_time() %>%
+  prepare_timeseries() %>%  # Prepare time series
+  iterate_over_models_and_time() %>%
   sort_metrics("RMSE") %>%
-  export_results()
+  export_results() 
 
-# Iterate over models
-# Iterate over time
-# Calculate metrics
-# Export results
-# Plot results
+for (num in 1:5) {
+  plot_experiment(tims_object, model_index=1, hor_num=num)
+}
