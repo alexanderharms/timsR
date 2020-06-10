@@ -31,9 +31,16 @@ load_data <- function(settings_list) {
   return(df)
 }
 
+sort_metrics_RMSE <- function(tims_object) {
+  tims_object$metrics <- tims_object$metrics %>% dplyr::arrange(RMSE)
+  # if (!is.null(obj$aggregate_fun)) {
+  #   obj$metrics_aggr <- obj$metrics_aggr %>% dplyr::arrange(!! sort_tag)
+  # }
+  return(tims_object)
+}
 sort_metrics <- function(tims_object, sort_tag) {
   sort_tag <- rlang::enquo(sort_tag)
-  tims_object$metrics <- tims_object$metrics %>% dplyr::arrange(!! sort_tag)
+  tims_object$metrics <- tims_object$metrics %>% dplyr::arrange(!!sort_tag)
   # if (!is.null(obj$aggregate_fun)) {
   #   obj$metrics_aggr <- obj$metrics_aggr %>% dplyr::arrange(!! sort_tag)
   # }

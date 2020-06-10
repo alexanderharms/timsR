@@ -51,7 +51,9 @@ calculate_metrics <- function(tims_object, model_index) {
   metrics <- accuracy(result_df[, 'actual'], result_df[, 'prediction'])
   # The metrics are stored as factors in the data frames. They have to be
   # converted to characters and then to numeric.
-  tims_object$metrics <- rbind(tims_object$metrics, 
+  # temp_df <- cbind(model_name, metrics) 
+  # rownames(temp_df) <- NULL
+  tims_object$metrics <- rbind(tims_object$metrics,
                                cbind(model_name, metrics), 
                        make.row.names = FALSE) %>%
     mutate(ME = ME %>% as.character() %>% as.numeric(),
@@ -80,7 +82,7 @@ iterate_over_time <- function(tims_object, model_index = 1) {
       add_predictions()  
   }
   
-  tims_object <- calculate_metrics(tims_object)
+  tims_object <- calculate_metrics(tims_object, model_index)
   return(tims_object)
 }
 
@@ -91,19 +93,19 @@ iterate_over_models_and_time <- function(tims_object) {
     
     # If the models don't converge, they are added to the error_models vector.
     # In this way the loop can continue.
-   tims_object <- tryCatch({
+   # tims_object <- tryCatch({
       # In rol_hor_list the metrics, metrics_aggr, plot_data and the models are
       # contained.
       tims_object <- iterate_over_time(tims_object, model_idx)
       tims_object
-      },
+      # },
     # If the rolling horizon gives an error, add the model name to the vector
     # of error_models.
-     error = function(cond) {
-       tims_object$error_models <- c(tims_object$error_models, model_name)
-       print(cond) # Print the error
-       return(tims_object)
-       })
+     # error = function(cond) {
+       # tims_object$error_models <- c(tims_object$error_models, model_name)
+       # print(cond) # Print the error
+       # return(tims_object)
+       # })
   }
   return(tims_object)
 }

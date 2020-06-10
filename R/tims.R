@@ -32,7 +32,9 @@ new_tims <- function(settings_list, dataset) {
   # } else {
   #   metrics_aggr <- NULL
   # }
-
+  
+  trained_models <- lapply(seq(1, length(model_names), length.out=length(model_names)),
+                           function(x) list())
   tims_list <- list(
     "dataset" = dataset,
     "logfile" = settings_list$logfile,
@@ -52,7 +54,7 @@ new_tims <- function(settings_list, dataset) {
     "metrics" = metrics,  
     "metrics_aggr" = metrics_aggr,  
     "error_models" = error_models,
-    "trained_models" = list(list()))
+    "trained_models" = trained_models)
   class(tims_list) <- "tims"
   return(tims_list)
 }

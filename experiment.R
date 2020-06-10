@@ -1,5 +1,5 @@
 ### A testing setup for time series analysis.
-# Authors: Alexander Harms
+# Author: Alexander Harms
 
 # To run experiments the settings need to be set.
 source("./settings/settings.R")

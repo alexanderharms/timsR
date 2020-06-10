@@ -27,7 +27,7 @@ calculate_horizon_dates <- function(tims_object, hor_num) {
   horizon_spacing <- 1
   start_horizon <- tims_object$start_test[1] + 
     (tims_object$start_test[2] - 1 + hor_num * horizon_spacing)/tims_object$frequency
-  end_horizon <- start_horizon + tims_object$horizon/tims_object$frequency
+  end_horizon <- start_horizon + (tims_object$horizon-1)/tims_object$frequency
   start_training <- tims_object$start_model
   end_training <- start_horizon - 1/tims_object$frequency
   
