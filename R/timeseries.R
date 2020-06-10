@@ -63,3 +63,41 @@ get_test_data <- function(tims_object, hor_num) {
            end=tims_object$end_horizon)
   return(tims_object)
 }
+
+add_weekend_regressor <- function(tims_object) {
+  target_series_length <- length(tims_object$target_series)
+  
+  weekend <- sapply(seq(0, target_series_length-1, 
+             length.out = target_series_length), 
+         function(num_days, init_date) {
+           init_date <- init_date %>%
+             ts_day_to_posix() %>%
+             lubridate::ymd()
+           day_date <- init_date + lubridate::period(num_days, units="days")
+           weekday <- lubridate::wday(day_date)
+           weekend <- ifelse(weekday == 6 | weekday == 7, 1, 0)
+           return(weekend)
+         }, init_date = tims_object$start_model) 
+  
+  
+  # Regressors to dataframe 
+  reg_series_df <- tims_object$reg_series %>% as.data.frame()
+  
+  if (is.null(reg_series_df)) {
+    tims_object$reg_var <- c("weekend")
+    tims_object$reg_series <- ts(weekend, 
+                                 start = tims_object$start_model,  
+                                 frequency = tims_object$frequency,  
+                                 names = names(tims_object$reg_var))
+    
+  } else {
+    reg_series_df <- cbind(reg_series_df, weekend)
+    tims_object$reg_var <- c(tims_object$reg_var, "weekend")
+    tims_object$reg_series <- ts(reg_series_df, 
+                                 start = tims_object$start_model,  
+                                 frequency = tims_object$frequency,  
+                                 names = names(tims_object$reg_var))
+  } 
+  
+  return(tims_object)
+}

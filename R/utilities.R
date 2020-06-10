@@ -96,3 +96,9 @@ plot_experiment <- function(tims_object, model_index=1, hor_num=1) {
           gpars=list(main = plot_title,
                      col= c('black', 'red', 'blue', 'blue')))
 }
+
+ts_day_to_posix <- function(tsdate) {
+  posixdate <- lubridate::ymd(paste0(tsdate[1], "0101")) + 
+    lubridate::ddays(tsdate[2]-1)
+  return(posixdate)
+}
