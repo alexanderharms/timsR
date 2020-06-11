@@ -93,19 +93,19 @@ iterate_over_models_and_time <- function(tims_object) {
     
     # If the models don't converge, they are added to the error_models vector.
     # In this way the loop can continue.
-   # tims_object <- tryCatch({
+   tims_object <- tryCatch({
       # In rol_hor_list the metrics, metrics_aggr, plot_data and the models are
       # contained.
       tims_object <- iterate_over_time(tims_object, model_idx)
       tims_object
-      # },
+      },
     # If the rolling horizon gives an error, add the model name to the vector
     # of error_models.
-     # error = function(cond) {
-       # tims_object$error_models <- c(tims_object$error_models, model_name)
-       # print(cond) # Print the error
-       # return(tims_object)
-       # })
+      error = function(cond) {
+       tims_object$error_models <- c(tims_object$error_models, model_name)
+       print(cond) # Print the error
+       return(tims_object)
+      })
   }
   return(tims_object)
 }
